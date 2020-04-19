@@ -1,0 +1,12 @@
+[submodule "thirdparty/esp-idf"]
+	path = thirdparty/esp-idf
+	url = https://github.com/espressif/esp-idf.git
+	branch = v3.3.1
+
+[submodule "thirdparty/unity"]
+	path = thirdparty/unity
+	url = https://github.com/ThrowTheSwitch/Unity.git
+	branch = v2.5.0
+[submodule "thirdparty/Unity"]
+	path = thirdparty/Unity
+	url = https://github.com/ThrowTheSwitch/Unity.git
