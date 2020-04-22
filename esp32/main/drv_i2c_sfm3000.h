@@ -1,5 +1,5 @@
 /*
-Copyright 2020 MVM Project
+Copyright 2020 TRIUMF
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,10 +15,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef SFM3000_H
-#define SFM3000_H
+#ifndef ESP32_MAIN_DRV_I2C_SFM3000_H_
+#define ESP32_MAIN_DRV_I2C_SFM3000_H_
 
-#include <hal_interface.h>
+#include <hal.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -26,49 +26,59 @@ extern "C" {
 #endif
 
 /**
- * @defgroup SFM3000
- * @ingroup driver
+ * @defgroup SFM3000 SFM3000
+ * @ingroup driver_i2c
  * @brief I2C Driver for the Sensirion, SFM3000, 14-bit Low Pressure Drop
  * Digital Flow Meter
  * @{
  */
 
-#define SFM3000_I2C_ADDR 0x40  //!< The SFM3000 has a fixed I2C address
-#define SFM3000_REG_START_FLOW \
-  0x1000  //!< Register to start the flow conversions
-#define SFM3000_REG_START_TEMP \
-  0x1001  //!< Register to start the temperature conversions
-#define SFM3000_REG_SCALE_FACTOR \
-  0x30DE  //!< Register to read the scale factor stored in the device
-#define SFM3000_REG_OFFSET \
-  0x30DF  //!< Register to read the offset stored in the SFM3000
-#define SFM3000_REG_PRODUCT_HI \
-  0x31E3  //!< Register to read the MSB of the Product ID
-#define SFM3000_REG_PRODUCT_LO \
-  0x31E4  //!< Register to read the LSB of the Product ID
-#define SFM3000_REG_SERIAL_HI \
-  0x31AE  //!< Register to read the MSB of the Serial Number
-#define SFM3000_REG_SERIAL_LO \
-  0x31AF  //!< Register to read the LSB of the Serial Number
-#define SFM3000_REG_SOFT_RESET \
-  0x2000  //!< Register to perform a soft reset of the device
+/** The SFM3000 has a fixed I2C address */
+#define SFM3000_I2C_ADDR 0x40
 
-#define SFM3000_STARTUP_TIME_MS \
-  100  //!< Minimum reset time required to wait before communication after power
-       //!< reset
-#define SFM3000_SOFT_RESET_TIME_MS \
-  80  //!< Minimum reset time required to wait before communication after soft
-      //!< reset occurs
-#define SFM3000_GIVEN_OFFSET \
-  32000  //!< Given by datasheet, should match what's read from device
-#define SFM3000_GIVEN_SCALE_FACTOR_AIR_N2 \
-  140.0f  //!< Given by datasheet, used to adjust conversion calculation for
-          //!< Air/N2
-#define SFM3000_GIVEN_SCALE_FACTOR_O2 \
-  142.8f  //!< Given by datasheet, used to adjust conversion calculation for O2
-#define SFM3000_CONVERT_REG_TO_BUFF(b, r) \
-  b[0] = (r) >> 8;                        \
-  b[1] = (r)&0xFF  //!< Simple macro to help setup command word for i2c write
+/** Register to start the flow conversions */
+#define SFM3000_REG_START_FLOW 0x1000
+
+/** Register to start the temperature conversions */
+#define SFM3000_REG_START_TEMP 0x1001
+
+/** Register to read the scale factor stored in the device */
+#define SFM3000_REG_SCALE_FACTOR 0x30DE
+
+/** Register to read the offset stored in the SFM3000 */
+#define SFM3000_REG_OFFSET 0x30DF
+
+/** Register to read the MSB of the Product ID */
+#define SFM3000_REG_PRODUCT_HI 0x31E3
+
+/** Register to read the LSB of the Product ID */
+#define SFM3000_REG_PRODUCT_LO 0x31E4
+
+/** Register to read the MSB of the Serial Number */
+#define SFM3000_REG_SERIAL_HI 0x31AE
+
+/** Register to read the LSB of the Serial Number */
+#define SFM3000_REG_SERIAL_LO 0x31AF
+
+/** Register to perform a soft reset of the device */
+#define SFM3000_REG_SOFT_RESET 0x2000
+
+/** Minimum reset time required to wait before communication after power reset
+ */
+#define SFM3000_STARTUP_TIME_MS 100
+
+/** Minimum reset time required to wait before communication after soft reset
+ * occurs */
+#define SFM3000_SOFT_RESET_TIME_MS 80
+
+/** Given by datasheet, should match what's read from device */
+#define SFM3000_GIVEN_OFFSET 32000
+
+/** Given by datasheet, used to adjust conversion calculation for Air/N2 */
+#define SFM3000_GIVEN_SCALE_FACTOR_AIR_N2 140.0f
+
+/** Given by datasheet, used to adjust conversion calculation for O2 */
+#define SFM3000_GIVEN_SCALE_FACTOR_O2 142.8f
 
 /** @brief Parameter settings for SFM3000
  *
@@ -124,14 +134,11 @@ hal_err_t sfm3000_start_temp(const hal_i2c_config_t* cfg);
  * \mbox{offset flow}}{\mbox{scale factor flow}} \f}
  *
  * @param cfg I2C configuration for this device
- * @param settings Settings to use when performing the conversion from raw value
- * to standard litre per minute (slm)
- * @param flow Pointer to variable where flow rate value will be stored after
- * readback and conversion
+ * @param flow_raw Pointer to variable where flow rate value will be stored after
+ * readback
  * @return HAL_OK if no error, hal_err_t value otherwise
  */
-hal_err_t sfm3000_read_flow(const hal_i2c_config_t* cfg,
-                            sfm3000_settings_t* settings, float* flow);
+hal_err_t sfm3000_read_flow(const hal_i2c_config_t* cfg, uint16_t* flow_raw);
 
 /** @brief Read temperature measurements
  *
@@ -202,10 +209,19 @@ hal_err_t sfm3000_read_serial(const hal_i2c_config_t* cfg, uint32_t* serial);
  */
 hal_err_t sfm3000_read_product(const hal_i2c_config_t* cfg, uint32_t* product);
 
+/**
+ * @brief Convert raw flow rate to slm
+ *
+ * @param flow_raw Raw flow rate to perform conversion on
+ * @param settings Offset and scale factor to use for conversion
+ * @param flow
+ */
+void sfm3000_convert_to_slm(uint16_t flow_raw, const sfm3000_settings_t* settings, float* flow);
+
 /** @} */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // SFM3000_H
+#endif  // ESP32_MAIN_DRV_I2C_SFM3000_H_

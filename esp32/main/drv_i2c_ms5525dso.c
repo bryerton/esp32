@@ -1,5 +1,5 @@
 /*
-Copyright 2020 MVM Project
+Copyright 2020 TRIUMF
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <assert.h>
 #include <drv_i2c_ms5525dso.h>
-#include <hal_interface.h>
+#include <hal.h>
 #include <stdint.h>
 
 hal_err_t ms5525dso_soft_reset(const hal_i2c_config_t* cfg) {
@@ -228,10 +228,10 @@ uint8_t ms5525dso_calculate_coeff_crc(const ms5525dso_coeff_t* coeff) {
   return (0x000F & (n_rem >> 12));  // // final 4-bit reminder is CRC code
 }
 
-hal_err_t ms5525dso_calculate_pt(const ms5525dso_qx_t* qx,
-                                 const ms5525dso_coeff_t* coeff, uint32_t d1,
-                                 uint32_t d2, int32_t* p_compensated,
-                                 int32_t* t_compensated) {
+void ms5525dso_calculate_pt(const ms5525dso_qx_t* qx,
+                            const ms5525dso_coeff_t* coeff, uint32_t d1,
+                            uint32_t d2, float* p_compensated,
+                            float* t_compensated) {
   int64_t dT;
   int32_t TEMP;
   int64_t OFF;
@@ -241,7 +241,7 @@ hal_err_t ms5525dso_calculate_pt(const ms5525dso_qx_t* qx,
   assert(p_compensated);
   assert(t_compensated);
   if ((!coeff) || (!p_compensated) || (!t_compensated)) {
-    return HAL_ERR_FAIL;
+    return;
   }
 
   *p_compensated = 0;
@@ -268,9 +268,7 @@ hal_err_t ms5525dso_calculate_pt(const ms5525dso_qx_t* qx,
 
   // Temperature Compensated Pressure
   // P=D1*SENS-OFF=(D1*SENS/2^21-OFF)/2^15
-  *p_compensated = (d1 * SENS / (1 << 21) - OFF) / (1 << 15);
-
-  *t_compensated = TEMP;
-
-  return HAL_OK;
+  *p_compensated =
+      MS5525DSO_CONVERT_P_TO_FLOAT((d1 * SENS / (1 << 21) - OFF) / (1 << 15));
+  *t_compensated = MS5525DSO_CONVERT_T_TO_FLOAT(TEMP);
 }

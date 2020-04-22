@@ -1,5 +1,5 @@
 /*
-Copyright 2020 MVM Project
+Copyright 2020 TRIUMF
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,10 +15,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef DRV_MS5525DSO_H
-#define DRV_MS5525DSO_H
+#ifndef ESP32_MAIN_DRV_I2C_MS5525DSO_H_
+#define ESP32_MAIN_DRV_I2C_MS5525DSO_H_
 
-#include <hal_interface.h>
+#include <hal.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -26,42 +26,51 @@ extern "C" {
 #endif
 
 /**
- * @defgroup MS5525DSO
- * @ingroup driver
+ * @defgroup MS5525DSO MS5525DSO
+ * @ingroup driver_i2c
  * @brief I2C Driver for the TE Connectivity, MS5525DSO, 24-bit integrated
  * digital presssure sensor
  * @{
  */
 
-#define MS5525DSO_I2C_ADDR_LOW \
-  0x77  //!< If CSB (CSn) pin is low, the MS5525DSO has this I2C address
-#define MS5525DSO_I2C_ADDR_HIGH \
-  0x76  //!< If CSB (CSn) pin is high, the MS5525DSO has this I2C address
+/** If CSB (CSn) pin is low, the MS5525DSO has this I2C address */
+#define MS5525DSO_I2C_ADDR_LOW 0x77
 
-#define MS5525DSO_REG_RESET \
-  0x1E  //!< Reset register is required to be selected prior to normal operation
-#define MS5525DSO_REG_ADC_READ \
-  0x00  //!< After a convert request to D1 or D2 is done, write to this register
-        //!< to request readback
-#define MS5525DSO_REG_PROM_READ_BASE \
-  0xA0  //!< PROM Address range is 0xA0 to 0xAE
-#define MS5525DSO_REG_PROM_ADDR_MASK 0x7  //!< Mask of the PROM address bits
-#define MS5525DSO_REG_PROM_ADDR_OFST 1    //!< Offset of PROM address bits
+/** If CSB (CSn) pin is high, the MS5525DSO has this I2C address */
+#define MS5525DSO_I2C_ADDR_HIGH 0x76
 
-#define MS5525DSO_NUM_PROM_BYTES \
-  2  //!< Number of PROM bytes per address location. Stored MSB first
-#define MS5525DSO_NUM_ADC_BYTES \
-  3  //!< Number of bytes to readback for ADC communication for D1 and D2
-#define MS5525DSO_NUM_PROM_ADDR 8  //!< Number of PROM address registers
+/** Reset register is required to be selected prior to normal operation */
+#define MS5525DSO_REG_RESET 0x1E
 
-#define MS5525DSO_CONVERT_P_TO_FLOAT(x) \
-  ((float)(x) /                         \
-   10000.0f)  //!< Utility function to convert compensated pressure to PSI
-#define MS5525DSO_CONVERT_T_TO_FLOAT(x) \
-  ((float)(x) / 100.0f)  //!< Utility function to convert compensated
-                         //!< temperature to Celsius
+/** After a convert request to D1 or D2 is done, write to this register to
+ * request readback */
+#define MS5525DSO_REG_ADC_READ 0x00
 
-// Qx Coefficients Matrix by Pressure Range
+/** PROM Address range is 0xA0 to 0xAE */
+#define MS5525DSO_REG_PROM_READ_BASE 0xA0
+
+/** Mask of the PROM address bits */
+#define MS5525DSO_REG_PROM_ADDR_MASK 0x7
+
+/** Offset of PROM address bits */
+#define MS5525DSO_REG_PROM_ADDR_OFST 1
+
+/** Number of PROM bytes per address location. Stored MSB first */
+#define MS5525DSO_NUM_PROM_BYTES 2
+
+/** Number of bytes to readback for ADC communication for D1 and D2 */
+#define MS5525DSO_NUM_ADC_BYTES 3
+
+/** Number of PROM address registers */
+#define MS5525DSO_NUM_PROM_ADDR 8
+
+/** Utility function to convert compensated pressure to PSI */
+#define MS5525DSO_CONVERT_P_TO_FLOAT(x) ((float)(x) / 10000.0f)
+
+/** Utility function to convert compensated temperature to Celsius */
+#define MS5525DSO_CONVERT_T_TO_FLOAT(x) ((float)(x) / 100.0f)
+
+/** Qx Coefficients Matrix by Pressure Range */
 #define MS5525DSO_QX_FOR_PP001DS() \
   { .Q1 = 15, .Q2 = 17, .Q3 = 7, .Q4 = 5, .Q5 = 7, .Q6 = 21 }
 #define MS5525DSO_QX_FOR_PP002GS() \
@@ -88,18 +97,18 @@ extern "C" {
 /** @brief Channels that can be selected for conversion
  */
 typedef enum ms5525dso_ch_e {
-  MS5525DSO_CH_D1_PRESSURE,
-  MS5525DSO_CH_D2_TEMPERATURE
+  MS5525DSO_CH_D1_PRESSURE,    //!< ADC Channel D1 is pressure
+  MS5525DSO_CH_D2_TEMPERATURE  //!< ADC Channel D2 is temperature
 } ms5525dso_ch_e;
 
 /** @brief Oversample rates that can be selected for conversion
  */
 typedef enum ms5525dso_osr_e {
-  MS5525DSO_OSR256,
-  MS5525DSO_OSR512,
-  MS5525DSO_OSR1024,
-  MS5525DSO_OSR2048,
-  MS5525DSO_OSR4096
+  MS5525DSO_OSR256,   //!< 256 samples
+  MS5525DSO_OSR512,   //!< 512 samples
+  MS5525DSO_OSR1024,  //!< 1024 samples
+  MS5525DSO_OSR2048,  //!< 2048 samples
+  MS5525DSO_OSR4096   //!< 4096 samples
 } ms5525dso_osr_e;
 
 /** @brief Coefficient table for storage of PROM values
@@ -111,12 +120,12 @@ typedef struct ms5525dso_coeff_t {
 /** @brief Qx coefficient table
  */
 typedef struct ms5525dso_qx_t {
-  int8_t Q1;
-  int8_t Q2;
-  int8_t Q3;
-  int8_t Q4;
-  int8_t Q5;
-  int8_t Q6;
+  int8_t Q1;  //!< Amount to bitshift when performing calculations
+  int8_t Q2;  //!< Amount to bitshift when performing calculations
+  int8_t Q3;  //!< Amount to bitshift when performing calculations
+  int8_t Q4;  //!< Amount to bitshift when performing calculations
+  int8_t Q5;  //!< Amount to bitshift when performing calculations
+  int8_t Q6;  //!< Amount to bitshift when performing calculations
 } ms5525dso_qx_t;
 
 /** @brief Perform soft reset of device
@@ -212,7 +221,6 @@ uint8_t ms5525dso_calculate_coeff_crc(const ms5525dso_coeff_t* coeff);
  * read out D1 (pressure), D2 (temperature), manufacturer provided QX table, and
  * the device provided calibrated coefficent table.
  *
- * @param osr Oversample rate to use
  * @param qx Pointer to QX table to use, determined by manufacturer model
  * @param coeff Pointer to coefficient table to use
  * @param d1 Pressure ADC channel value to use
@@ -221,12 +229,11 @@ uint8_t ms5525dso_calculate_coeff_crc(const ms5525dso_coeff_t* coeff);
  * will be stored
  * @param t_compensated Pointer to float where calculated compensated
  * temperature will be stored
- * @return HAL_OK if no error, hal_err_t value otherwise
  */
-hal_err_t ms5525dso_calculate_pt(const ms5525dso_qx_t* qx,
+void ms5525dso_calculate_pt(const ms5525dso_qx_t* qx,
                                  const ms5525dso_coeff_t* coeff, uint32_t d1,
-                                 uint32_t d2, int32_t* p_compensated,
-                                 int32_t* t_compensated);
+                                 uint32_t d2, float* p_compensated,
+                                 float* t_compensated);
 
 /** @} */
 
@@ -234,4 +241,4 @@ hal_err_t ms5525dso_calculate_pt(const ms5525dso_qx_t* qx,
 }
 #endif
 
-#endif  // DRV_MS5525DSO_H
+#endif  // ESP32_MAIN_DRV_I2C_MS5525DSO_H_

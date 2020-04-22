@@ -1,5 +1,5 @@
 /*
-Copyright 2020 MVM Project
+Copyright 2020 TRIUMF
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,10 +15,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TCA9548A_H
-#define TCA9548A_H
+#ifndef ESP32_MAIN_DRV_I2C_TCA9548A_H_
+#define ESP32_MAIN_DRV_I2C_TCA9548A_H_
 
-#include <hal_interface.h>
+#include <hal.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -26,9 +26,10 @@ extern "C" {
 #endif
 
 /**
- * @defgroup TCA9548A
- * @ingroup driver
- * @brief Texas Instruments, Low-Voltage 8-Channel I2C Switch with Reset
+ * @defgroup TCA9548A TCA9548A
+ * @ingroup driver_i2c
+ * @brief I2C Driver for the Texas Instruments, TCA9548A, Low-Voltage 8-Channel
+ * I2C Switch with Reset
  * @{
  */
 
@@ -79,4 +80,4 @@ hal_err_t tca9548a_read_channel(const hal_i2c_config_t* cfg,
 }
 #endif
 
-#endif  // TCA9548A_H
+#endif  // ESP32_MAIN_DRV_I2C_TCA9548A_H_

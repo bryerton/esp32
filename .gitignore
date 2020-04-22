@@ -1,0 +1,5 @@
+.vscode
+esp32/build
+esp32/sdkconfig
+esp32/docs/compiled
+esp32/sdkconfig.old

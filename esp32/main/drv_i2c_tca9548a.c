@@ -1,5 +1,5 @@
 /*
-Copyright 2020 MVM Project
+Copyright 2020 TRIUMF
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <assert.h>
 #include <drv_i2c_tca9548a.h>
-#include <hal_interface.h>
+#include <hal.h>
 #include <stdint.h>
 
 hal_err_t tca9548a_write_channel(const hal_i2c_config_t* cfg,

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 MVM Project
+Copyright 2020 TRIUMF
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <assert.h>
+#include <hal.h>
 #include <drv_i2c_sfm3000.h>
-#include <hal_interface.h>
 #include <stdint.h>
 
 static const uint8_t crc8_table[] = {
@@ -44,7 +44,7 @@ static const uint8_t crc8_table[] = {
     0x82, 0xB3, 0xE0, 0xD1, 0x46, 0x77, 0x24, 0x15, 0x3B, 0x0A, 0x59, 0x68,
     0xFF, 0xCE, 0x9D, 0xAC};
 
-static uint8_t crc8(uint8_t *buff, uint8_t len);
+static uint8_t crc8(const uint8_t *buff, uint8_t len);
 static hal_err_t read_2byte(const hal_i2c_config_t *cfg, uint16_t *buffer);
 static hal_err_t read_4byte(const hal_i2c_config_t *cfg, uint32_t *buffer);
 
@@ -56,7 +56,9 @@ hal_err_t sfm3000_soft_reset(const hal_i2c_config_t *cfg) {
     return HAL_ERR_FAIL;
   }
 
-  SFM3000_CONVERT_REG_TO_BUFF(cmd, SFM3000_REG_SOFT_RESET);
+  cmd[0] = SFM3000_REG_SOFT_RESET >> 8;
+  cmd[1] = SFM3000_REG_SOFT_RESET & 0xFF;
+
   return hal_i2c_write(cfg, cmd, sizeof(cmd));
 }
 
@@ -68,7 +70,9 @@ hal_err_t sfm3000_start_flow(const hal_i2c_config_t *cfg) {
     return HAL_ERR_FAIL;
   }
 
-  SFM3000_CONVERT_REG_TO_BUFF(cmd, SFM3000_REG_START_FLOW);
+  cmd[0] = SFM3000_REG_START_FLOW >> 8;
+  cmd[1] = SFM3000_REG_START_FLOW & 0xFF;
+
   return hal_i2c_write(cfg, cmd, sizeof(cmd));
 }
 
@@ -80,43 +84,29 @@ hal_err_t sfm3000_start_temp(const hal_i2c_config_t *cfg) {
     return HAL_ERR_FAIL;
   }
 
-  SFM3000_CONVERT_REG_TO_BUFF(cmd, SFM3000_REG_START_TEMP);
+  cmd[0] = SFM3000_REG_START_TEMP >> 8;
+  cmd[1] = SFM3000_REG_START_TEMP & 0xFF;
+
   return hal_i2c_write(cfg, cmd, sizeof(cmd));
 }
 
-hal_err_t sfm3000_read_flow(const hal_i2c_config_t *cfg,
-                            sfm3000_settings_t *settings, float *flow) {
+hal_err_t sfm3000_read_flow(const hal_i2c_config_t *cfg, uint16_t *flow_raw) {
   hal_err_t res;
   uint16_t value;
 
-  assert(cfg);
-  if (!cfg) {
+  assert(cfg && flow_raw);
+  if (!cfg || !flow_raw) {
     return HAL_ERR_FAIL;
   }
 
-  assert(settings);
-  if (!settings) {
-    return HAL_ERR_FAIL;
-  }
-
-  assert(flow);
-  if (!flow) {
-    return HAL_ERR_FAIL;
-  }
-
-  *flow = 0.0f;
+  *flow_raw = 0.0f;
 
   res = read_2byte(cfg, &value);
   if (res != HAL_OK) {
     return res;
   }
 
-  // Protect against divide by zero
-  // As the given scale factors are in the ~140 range, this should never occur
-  // normally
-  if (settings->scale_factor > 0.01) {
-    *flow = (value - settings->offset) / settings->scale_factor;
-  }
+  *flow_raw = value;
 
   return res;
 }
@@ -125,13 +115,8 @@ hal_err_t sfm3000_read_temp(const hal_i2c_config_t *cfg, float *temp) {
   hal_err_t res;
   uint16_t value;
 
-  assert(cfg);
-  if (!cfg) {
-    return HAL_ERR_FAIL;
-  }
-
-  assert(temp);
-  if (!temp) {
+  assert(cfg && temp);
+  if (!cfg || !temp) {
     return HAL_ERR_FAIL;
   }
 
@@ -155,19 +140,16 @@ hal_err_t sfm3000_read_scale_factor(const hal_i2c_config_t *cfg,
   hal_err_t res;
   uint16_t value;
 
-  assert(cfg);
-  if (!cfg) {
-    return HAL_ERR_FAIL;
-  }
-
-  assert(scale_factor);
-  if (!scale_factor) {
+  assert(cfg && scale_factor);
+  if (!cfg || !scale_factor) {
     return HAL_ERR_FAIL;
   }
 
   *scale_factor = 0;
 
-  SFM3000_CONVERT_REG_TO_BUFF(cmd, SFM3000_REG_SCALE_FACTOR);
+  cmd[0] = SFM3000_REG_SCALE_FACTOR >> 8;
+  cmd[1] = SFM3000_REG_SCALE_FACTOR & 0xFF;
+
   res = hal_i2c_write(cfg, cmd, sizeof(cmd));
   if (res != HAL_OK) {
     return res;
@@ -188,19 +170,16 @@ hal_err_t sfm3000_read_offset(const hal_i2c_config_t *cfg, float *offset) {
   hal_err_t res;
   uint16_t value;
 
-  assert(cfg);
-  if (!cfg) {
-    return HAL_ERR_FAIL;
-  }
-
-  assert(offset);
-  if (!offset) {
+  assert(cfg && offset);
+  if (!cfg || !offset) {
     return HAL_ERR_FAIL;
   }
 
   *offset = 0;
 
-  SFM3000_CONVERT_REG_TO_BUFF(cmd, SFM3000_REG_OFFSET);
+  cmd[0] = SFM3000_REG_OFFSET >> 8;
+  cmd[1] = SFM3000_REG_OFFSET & 0xFF;
+
   res = hal_i2c_write(cfg, cmd, sizeof(cmd));
   if (res != HAL_OK) {
     return res;
@@ -220,19 +199,16 @@ hal_err_t sfm3000_read_serial(const hal_i2c_config_t *cfg, uint32_t *serial) {
   uint8_t cmd[2];
   hal_err_t res;
 
-  assert(cfg);
-  if (!cfg) {
-    return HAL_ERR_FAIL;
-  }
-
-  assert(serial);
-  if (!serial) {
+  assert(cfg && serial);
+  if (!cfg || !serial) {
     return HAL_ERR_FAIL;
   }
 
   *serial = 0;
 
-  SFM3000_CONVERT_REG_TO_BUFF(cmd, SFM3000_REG_SERIAL_HI);
+  cmd[0] = SFM3000_REG_SERIAL_HI >> 8;
+  cmd[1] = SFM3000_REG_SERIAL_HI & 0xFF;
+
   res = hal_i2c_write(cfg, cmd, sizeof(cmd));
   if (res != HAL_OK) {
     return res;
@@ -245,19 +221,16 @@ hal_err_t sfm3000_read_product(const hal_i2c_config_t *cfg, uint32_t *product) {
   uint8_t cmd[2];
   hal_err_t res;
 
-  assert(cfg);
-  if (!cfg) {
-    return HAL_ERR_FAIL;
-  }
-
-  assert(product);
-  if (!product) {
+  assert(cfg && product);
+  if (!cfg || !product) {
     return HAL_ERR_FAIL;
   }
 
   *product = 0;
 
-  SFM3000_CONVERT_REG_TO_BUFF(cmd, SFM3000_REG_PRODUCT_HI);
+  cmd[0] = SFM3000_REG_PRODUCT_HI >> 8;
+  cmd[1] = SFM3000_REG_PRODUCT_HI & 0xFF;
+
   res = hal_i2c_write(cfg, cmd, sizeof(cmd));
   if (res != HAL_OK) {
     return res;
@@ -266,17 +239,29 @@ hal_err_t sfm3000_read_product(const hal_i2c_config_t *cfg, uint32_t *product) {
   return read_4byte(cfg, product);
 }
 
+void sfm3000_convert_to_slm(uint16_t flow_raw,
+                            const sfm3000_settings_t *settings, float *flow) {
+  assert(settings && flow);
+  if (!settings || !flow) {
+    return;
+  }
+
+  // Protect against divide by zero
+  // As the given scale factors are in the ~140 range, this should never occur
+  // And can be considered an error
+  if (settings->scale_factor > 1.0f) {
+    *flow = (flow_raw - settings->offset) / settings->scale_factor;
+  } else {
+    *flow = 0.0f;
+  }
+}
+
 static hal_err_t read_2byte(const hal_i2c_config_t *cfg, uint16_t *buffer) {
   hal_err_t res;
   uint8_t buff[3];  // First two bytes are data, third is crc
 
-  assert(cfg);
-  if (!cfg) {
-    return HAL_ERR_FAIL;
-  }
-
-  assert(buffer);
-  if (!buffer) {
+  assert(cfg && buffer);
+  if (!cfg || !buffer) {
     return HAL_ERR_FAIL;
   }
 
@@ -302,13 +287,8 @@ static hal_err_t read_4byte(const hal_i2c_config_t *cfg, uint32_t *buffer) {
   hal_err_t res;
   uint8_t buff[6];
 
-  assert(cfg);
-  if (!cfg) {
-    return HAL_ERR_FAIL;
-  }
-
-  assert(buffer);
-  if (!buffer) {
+  assert(cfg && buffer);
+  if (!cfg || !buffer) {
     return HAL_ERR_FAIL;
   }
 
@@ -330,7 +310,7 @@ static hal_err_t read_4byte(const hal_i2c_config_t *cfg, uint32_t *buffer) {
   return res;
 }
 
-static uint8_t crc8(uint8_t *buff, uint8_t len) {
+static uint8_t crc8(const uint8_t *buff, uint8_t len) {
   uint8_t n;
   uint8_t crc;
 
