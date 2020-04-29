@@ -6,3 +6,7 @@
 [submodule "thirdparty/Unity"]
 	path = thirdparty/Unity
 	url = https://github.com/ThrowTheSwitch/Unity.git
+[submodule "thirdparty/cppcheck"]
+	path = thirdparty/cppcheck
+	url = https://github.com/danmar/cppcheck.git
+	branch = master
