@@ -1,4 +1,4 @@
-/*
+/**
 Copyright 2020 TRIUMF
 
 This program is free software: you can redistribute it and/or modify
@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #ifndef ESP32_MAIN_DRV_I2C_SFM3000_H_
@@ -34,45 +34,42 @@ extern "C" {
  */
 
 /** The SFM3000 has a fixed I2C address */
-#define SFM3000_I2C_ADDR 0x40
+#define SFM3000_I2C_ADDR 0x40u
 
 /** Register to start the flow conversions */
-#define SFM3000_REG_START_FLOW 0x1000
-
-/** Register to start the temperature conversions */
-#define SFM3000_REG_START_TEMP 0x1001
+#define SFM3000_REG_START_FLOW 0x1000u
 
 /** Register to read the scale factor stored in the device */
-#define SFM3000_REG_SCALE_FACTOR 0x30DE
+#define SFM3000_REG_SCALE_FACTOR 0x30DEu
 
 /** Register to read the offset stored in the SFM3000 */
-#define SFM3000_REG_OFFSET 0x30DF
+#define SFM3000_REG_OFFSET 0x30DFu
 
 /** Register to read the MSB of the Product ID */
-#define SFM3000_REG_PRODUCT_HI 0x31E3
+#define SFM3000_REG_PRODUCT_HI 0x31E3u
 
 /** Register to read the LSB of the Product ID */
-#define SFM3000_REG_PRODUCT_LO 0x31E4
+#define SFM3000_REG_PRODUCT_LO 0x31E4u
 
 /** Register to read the MSB of the Serial Number */
-#define SFM3000_REG_SERIAL_HI 0x31AE
+#define SFM3000_REG_SERIAL_HI 0x31AEu
 
 /** Register to read the LSB of the Serial Number */
-#define SFM3000_REG_SERIAL_LO 0x31AF
+#define SFM3000_REG_SERIAL_LO 0x31AFu
 
 /** Register to perform a soft reset of the device */
-#define SFM3000_REG_SOFT_RESET 0x2000
+#define SFM3000_REG_SOFT_RESET 0x2000u
 
 /** Minimum reset time required to wait before communication after power reset
  */
-#define SFM3000_STARTUP_TIME_MS 100
+#define SFM3000_STARTUP_TIME_MS 100u
 
 /** Minimum reset time required to wait before communication after soft reset
  * occurs */
-#define SFM3000_SOFT_RESET_TIME_MS 80
+#define SFM3000_SOFT_RESET_TIME_MS 80u
 
 /** Given by datasheet, should match what's read from device */
-#define SFM3000_GIVEN_OFFSET 32000
+#define SFM3000_GIVEN_OFFSET 32000u
 
 /** Given by datasheet, used to adjust conversion calculation for Air/N2 */
 #define SFM3000_GIVEN_SCALE_FACTOR_AIR_N2 140.0f
@@ -98,7 +95,7 @@ typedef struct sfm3000_settings_t {
  * other functions of this device until the reset period is over
  *
  * @param cfg I2C configuration for this device
- * @return HAL_OK if no error, hal_err_t value otherwise
+ * @return hal_err_t
  */
 hal_err_t sfm3000_soft_reset(const hal_i2c_config_t* cfg);
 
@@ -109,21 +106,9 @@ hal_err_t sfm3000_soft_reset(const hal_i2c_config_t* cfg);
  * further calls to start conversions until another register is written to.
  *
  * @param cfg I2C configuration for this device
- * @return HAL_OK if no error, hal_err_t value otherwise
+ * @return hal_err_t
  */
 hal_err_t sfm3000_start_flow(const hal_i2c_config_t* cfg);
-
-/** @brief Start temperature conversions
- *
- * Initiates automatic conversions of the temperature measurements, which are
- * performed every ~0.5ms. Once this is called, the temperature can be read out
- * without further calls to start conversions until another register is written
- * to.
- *
- * @param cfg I2C configuration for this device
- * @return HAL_OK if no error, hal_err_t value otherwise
- */
-hal_err_t sfm3000_start_temp(const hal_i2c_config_t* cfg);
 
 /** @brief Read flow measurements
  *
@@ -136,22 +121,9 @@ hal_err_t sfm3000_start_temp(const hal_i2c_config_t* cfg);
  * @param cfg I2C configuration for this device
  * @param flow_raw Pointer to variable where flow rate value will be stored after
  * readback
- * @return HAL_OK if no error, hal_err_t value otherwise
+ * @return hal_err_t
  */
 hal_err_t sfm3000_read_flow(const hal_i2c_config_t* cfg, uint16_t* flow_raw);
-
-/** @brief Read temperature measurements
- *
- * Reads back the temperature from the device.
- * The function then performs the conversion to Celsius.
- * WARNING: This formula is currently unknown
- *
- * @param cfg I2C configuration for this device
- * @param temp Pointer to variable where temperature value will be stored after
- * readback and conversion
- * @return HAL_OK if no error, hal_err_t value otherwise
- */
-hal_err_t sfm3000_read_temp(const hal_i2c_config_t* cfg, float* temp);
 
 /** @brief Read scale factor from device
  *
@@ -166,7 +138,7 @@ hal_err_t sfm3000_read_temp(const hal_i2c_config_t* cfg, float* temp);
  * @param cfg I2C configuration for this device
  * @param scale_factor Pointer to variable where scale_factor value will be
  * stored after readback
- * @return HAL_OK if no error, hal_err_t value otherwise
+ * @return hal_err_t
  */
 hal_err_t sfm3000_read_scale_factor(const hal_i2c_config_t* cfg,
                                     float* scale_factor);
@@ -181,7 +153,7 @@ hal_err_t sfm3000_read_scale_factor(const hal_i2c_config_t* cfg,
  * @param cfg I2C configuration for this device
  * @param offset Pointer to variable where offset value will be stored after
  * readback
- * @return HAL_OK if no error, hal_err_t value otherwise
+ * @return hal_err_t
  */
 hal_err_t sfm3000_read_offset(const hal_i2c_config_t* cfg, float* offset);
 
@@ -193,7 +165,7 @@ hal_err_t sfm3000_read_offset(const hal_i2c_config_t* cfg, float* offset);
  * @param cfg I2C configuration for this device
  * @param serial Pointer to variable where serial number will be stored after
  * readback
- * @return HAL_OK if no error, hal_err_t value otherwise
+ * @return hal_err_t
  */
 hal_err_t sfm3000_read_serial(const hal_i2c_config_t* cfg, uint32_t* serial);
 
@@ -205,7 +177,7 @@ hal_err_t sfm3000_read_serial(const hal_i2c_config_t* cfg, uint32_t* serial);
  * @param cfg I2C configuration for this device
  * @param product Pointer to variable where product number will be stored after
  * readback
- * @return HAL_OK if no error, hal_err_t value otherwise
+ * @return hal_err_t
  */
 hal_err_t sfm3000_read_product(const hal_i2c_config_t* cfg, uint32_t* product);
 
@@ -215,8 +187,9 @@ hal_err_t sfm3000_read_product(const hal_i2c_config_t* cfg, uint32_t* product);
  * @param flow_raw Raw flow rate to perform conversion on
  * @param settings Offset and scale factor to use for conversion
  * @param flow
+ * @return hal_err_t
  */
-void sfm3000_convert_to_slm(uint16_t flow_raw, const sfm3000_settings_t* settings, float* flow);
+hal_err_t sfm3000_convert_to_slm(uint16_t flow_raw, const sfm3000_settings_t* settings, float* flow);
 
 /** @} */
 

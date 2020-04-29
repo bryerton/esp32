@@ -12,22 +12,52 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #ifndef ESP32_MAIN_CONTROL_H_
 #define ESP32_MAIN_CONTROL_H_
 
 #include <stdint.h>
-#include <hal.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void control_init(void);
+/**
+ * @defgroup control Controller
+ * @brief Controller for the device
+ * @{
+ */
 
-void control_update(hal_timestamp_t ts_current, hal_timestamp_t ts_delta);
+typedef enum control_mode_t {
+  CONTROL_MODE_OFF,
+  CONTROL_MODE_MANUAL,
+} control_mode_t;
+
+typedef enum control_state_t {
+  CONTROL_STATE_RESET,
+  CONTROL_STATE_INIT,
+  CONTROL_STATE_START,
+  CONTROL_STATE_RUN,
+  CONTROL_STATE_STOP,
+  CONTROL_STATE_SHUTDOWN
+} control_state_t;
+
+typedef struct control_settings_t {
+  control_mode_t mode;
+} control_settings_t;
+
+typedef struct control_t {
+  control_state_t state;
+  control_settings_t settings;
+} control_t;
+
+void control_init(control_t* control);
+
+void control_update(control_t* control);
+
+/** @} */
 
 #ifdef __cplusplus
 }

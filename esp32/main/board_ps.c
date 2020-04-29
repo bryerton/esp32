@@ -1,38 +1,53 @@
+/*
+Copyright 2020 TRIUMF
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see www.gnu.org/licenses/.
+*/
+
 #include <string.h>
 #include <hal.h>
-#include <board.h>
 #include <board_ps.h>
 #include <drv_i2c_ms5525dso.h>
 
+static void update_state(board_dev_ps_t* ps, pressor_sensor_state_t new_state);
+
 void ps_init(board_dev_ps_t* ps, hal_i2c_dev_t i2c_dev,
              const ms5525dso_qx_t* qx) {
-  assert(ps && qx);
-  if (!ps || !qx) {
-    return;
-  }
+  assert(ps);
+  assert(qx);
 
-  ps->status = BOARD_DEV_NOT_READY;
-  ps->ts_state = 0;
-  ps->i2c_dev = i2c_dev;
-  ps->state = PS_SENSOR_ST_RESET;
-  ps->temp = 0.0f;
-  ps->pressure = 0.0f;
-  memcpy(&ps->qx, qx, sizeof(ms5525dso_qx_t));
+  if ((ps != NULL) && (qx != NULL)) {
+    ps->status = BOARD_DEV_NOT_READY;
+    ps->i2c_dev = i2c_dev;
+    ps->temp = 0.0f;
+    ps->pressure = 0.0f;
+    memcpy(&ps->qx, qx, sizeof(ms5525dso_qx_t));
+    update_state(ps, PS_SENSOR_ST_RESET);
+  }
 }
 
 board_dev_status_t ps_update(board_dev_ps_t* ps) {
   hal_err_t res;
 
-  // hal_log(HAL_LOG_DEBUG, "PS1", "State %u", ps->state);
   switch (ps->state) {
-    case PS_SENSOR_ST_ERR:
-      hal_log(HAL_LOG_ERROR, "PS1", "Failed");
-      // Fall through to RESET
     case PS_SENSOR_ST_RESET:
       ps->ts_state = hal_get_timestamp();
       ps->status = BOARD_DEV_NOT_READY;
       res = ms5525dso_soft_reset(hal_i2c_get_config(ps->i2c_dev));
-      ps->state = (res == HAL_OK) ? PS_SENSOR_ST_CONFIG : PS_SENSOR_ST_ERR;
+      if (res == HAL_OK) {
+        update_state(ps, PS_SENSOR_ST_CONFIG);
+      }
       break;
 
     case PS_SENSOR_ST_CONFIG:
@@ -53,15 +68,11 @@ board_dev_status_t ps_update(board_dev_ps_t* ps) {
           res = ms5525dso_start_ch_convert(hal_i2c_get_config(ps->i2c_dev),
                                            MS5525DSO_CH_D1_PRESSURE,
                                            MS5525DSO_OSR256);
-          if (res == HAL_OK) {
-            // If the conversion started, take a timestamp and prepare to read
-            ps->ts_state = hal_get_timestamp();
-            ps->state = PS_SENSOR_ST_READ_CH1;
-          } else {
-            ps->state = PS_SENSOR_ST_ERR;
-          }
+        }
+        if (res == HAL_OK) {
+          update_state(ps, PS_SENSOR_ST_READ_CH1);
         } else {
-          ps->state = PS_SENSOR_ST_ERR;
+          update_state(ps, PS_SENSOR_ST_RESET);
         }
       }
       break;
@@ -74,15 +85,12 @@ board_dev_status_t ps_update(board_dev_ps_t* ps) {
           res = ms5525dso_start_ch_convert(hal_i2c_get_config(ps->i2c_dev),
                                            MS5525DSO_CH_D2_TEMPERATURE,
                                            MS5525DSO_OSR256);
-          if (res == HAL_OK) {
-            // If the conversion started, take a timestamp and prepare to read
-            ps->ts_state = hal_get_timestamp();
-            ps->state = PS_SENSOR_ST_READ_CH2;
-          } else {
-            ps->state = PS_SENSOR_ST_ERR;
-          }
+        }
+
+        if (res == HAL_OK) {
+          update_state(ps, PS_SENSOR_ST_READ_CH2);
         } else {
-          ps->state = PS_SENSOR_ST_ERR;
+          update_state(ps, PS_SENSOR_ST_RESET);
         }
       }
       break;
@@ -96,28 +104,21 @@ board_dev_status_t ps_update(board_dev_ps_t* ps) {
           res = ms5525dso_start_ch_convert(hal_i2c_get_config(ps->i2c_dev),
                                            MS5525DSO_CH_D1_PRESSURE,
                                            MS5525DSO_OSR256);
-          if (res == HAL_OK) {
-            ps->ts_state = hal_get_timestamp();
-            ps->status = BOARD_DEV_READY;
-            ps->state = PS_SENSOR_ST_READ_CH1;
-            // Technically we could do this once the ADC read in this state
-            // succeeds but there is no point if the next conversion start
-            // failed, as the sensor state would go to SENSOR_STATUS_INIT so we
-            // do it here instead
-            ms5525dso_calculate_pt(&ps->qx, &ps->coeff, ps->d1, ps->d2,
-                                   &ps->pressure, &ps->temp);
-          } else {
-            ps->state = PS_SENSOR_ST_ERR;
-          }
+        }
+        if (res == HAL_OK) {
+          ps->status = BOARD_DEV_READY;
+          update_state(ps, PS_SENSOR_ST_READ_CH1);
+          ms5525dso_calculate_pt(&ps->qx, &ps->coeff, ps->d1, ps->d2,
+                                 &ps->pressure, &ps->temp);
         } else {
-          ps->state = PS_SENSOR_ST_ERR;
+          update_state(ps, PS_SENSOR_ST_RESET);
         }
       }
       break;
 
     default:
       ps->status = BOARD_DEV_NOT_READY;
-      ps->state = PS_SENSOR_ST_ERR;
+      update_state(ps, PS_SENSOR_ST_RESET);
       break;
   }
 
@@ -125,32 +126,52 @@ board_dev_status_t ps_update(board_dev_ps_t* ps) {
 }
 
 board_dev_status_t ps_get_status(board_dev_ps_t* ps) {
+  board_dev_status_t res;
+
   assert(ps);
-  if(!ps) {
-    return BOARD_DEV_NOT_READY;
+
+  res = BOARD_DEV_NOT_READY;
+
+  if (ps != NULL) {
+    res = ps->status;
   }
 
-  return ps->status;
+  return res;
 }
 
 board_dev_status_t ps_get_pressure(board_dev_ps_t* ps, float* pressure) {
+  board_dev_status_t res;
+
   assert(ps);
-  if(!ps) {
-    return BOARD_DEV_NOT_READY;
+
+  res = BOARD_DEV_NOT_READY;
+
+  if (ps != NULL) {
+    *pressure = ps->pressure;
   }
 
-  *pressure = ps->pressure;
-
-  return ps->status;
+  return res;
 }
 
 board_dev_status_t ps_get_temp(board_dev_ps_t* ps, float* temperature) {
+  board_dev_status_t res;
+
   assert(ps);
-  if(!ps) {
-    return BOARD_DEV_NOT_READY;
+
+  res = BOARD_DEV_NOT_READY;
+
+  if (ps != NULL) {
+    *temperature = ps->temp;
   }
 
-  *temperature = ps->temp;
+  return res;
+}
 
-  return ps->status;
+static void update_state(board_dev_ps_t* ps, pressor_sensor_state_t new_state) {
+  assert(ps);
+
+  if (ps != NULL) {
+    ps->state = new_state;
+    ps->ts_state = hal_get_timestamp();
+  }
 }

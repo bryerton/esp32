@@ -15,12 +15,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see www.gnu.org/licenses/.
 */
 
-#ifndef ESP32_MAIN_BOARD_DEV_H_
-#define ESP32_MAIN_BOARD_DEV_H_
+#include <serial_link.h>
+#include <hal.h>
 
-typedef enum board_dev_status_t {
-  BOARD_DEV_READY,
-  BOARD_DEV_NOT_READY
-} board_dev_status_t;
+void serial_link_init(serial_link_t* serial_link) {
+  assert(serial_link);
+}
 
-#endif  // ESP32_MAIN_BOARD_DEV_H_
+void serial_link_update(serial_link_t* serial_link) {
+  assert(serial_link);
+}

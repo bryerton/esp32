@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #ifndef ESP32_MAIN_DRV_I2C_TCA9548A_H_
@@ -42,18 +42,14 @@ extern "C" {
 #define TCA9548A_ADDR_HHL 0x76  //!< Address option for A2/A1/A0 (110)
 #define TCA9548A_ADDR_HHH 0x77  //!< Address option for A2/A1/A0 (111)
 
-#define TCA9548A_CH0 (1 << 0)  //!< Channel 0 bitmask
-#define TCA9548A_CH1 (1 << 1)  //!< Channel 1 bitmask
-#define TCA9548A_CH2 (1 << 2)  //!< Channel 2 bitmask
-#define TCA9548A_CH3 (1 << 3)  //!< Channel 3 bitmask
-#define TCA9548A_CH4 (1 << 4)  //!< Channel 4 bitmask
-#define TCA9548A_CH5 (1 << 5)  //!< Channel 5 bitmask
-#define TCA9548A_CH6 (1 << 6)  //!< Channel 6 bitmask
-#define TCA9548A_CH7 (1 << 7)  //!< Channel 7 bitmask
-
-#define TCA9548A_INVALID_CH \
-  0xFF  //!< Invalid mask return by tca9548a_read_channel() in the event of
-        //!< failure
+#define TCA9548A_CH0 (1u << 0)  //!< Channel 0 bitmask
+#define TCA9548A_CH1 (1u << 1)  //!< Channel 1 bitmask
+#define TCA9548A_CH2 (1u << 2)  //!< Channel 2 bitmask
+#define TCA9548A_CH3 (1u << 3)  //!< Channel 3 bitmask
+#define TCA9548A_CH4 (1u << 4)  //!< Channel 4 bitmask
+#define TCA9548A_CH5 (1u << 5)  //!< Channel 5 bitmask
+#define TCA9548A_CH6 (1u << 6)  //!< Channel 6 bitmask
+#define TCA9548A_CH7 (1u << 7)  //!< Channel 7 bitmask
 
 /** @brief Set the active channel(s) on the device
  *

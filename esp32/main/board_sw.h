@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #ifndef ESP32_MAIN_BOARD_SW_H_
@@ -20,7 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <hal.h>
-#include <board.h>
 #include <board_dev.h>
 #include <drv_i2c_tca9548a.h>
 

@@ -2,21 +2,30 @@
 
 ## Installing
 
-In order to build this project, several additiona libraries are needed.
+In order to build this project, additional libraries/repositories are needed.
 
-- Espressif ESP-IDF v3.3.1
+- Espressif ESP-IDF v3.3.2
 - Unity test framework v2.5.0
+- cppcheck 1.90
+
+In order to test this project, additional packages are needed
+
+- ceedling 0.29.1
+- cppcheck 1.90
+- gcovr 4.2
+- valgrind 3.13.0
+- doxygen 1.8.13
 
 To install the third party libraries, type the following
 
 - `git submodule init`
 - `git submodule update --recursive`
 
-The ESP-IDF and doxygen may require additional packages to run.
+To install the third party tools, not covered by the `apt install ...` below
 
-Under Ubuntu 18.04 LTS run the following to install the missing packages:
-
-`sudo apt install cmake ninja-build gperf flex bison python-pip doxygen graphviz texlive-latex-base`
+- `sudo apt install -y cmake ninja-build gperf flex bison python-pip doxygen graphviz texlive-latex-base gcovr valgrind ruby`
+- `gem install ceedling`
+- Perform the cppcheck installation described in `docs/building_cppcheck.md`
 
 To install ESP-IDF type:  `./thirdparty/esp-idf/install.sh`
 
@@ -28,8 +37,7 @@ An openssl key is required to sign the executable, if one has not been provided 
 
 `openssl ecparam -name prime256v1 -genkey -noout -out ./esp32/cert/secure_boot_signing_key.pem`
 
-Keep this secret!
-
+!Keep this openssl key secret!
 
 ## Building
 
@@ -49,19 +57,10 @@ In the `esp32` directory, type `idf.py flash` to build the project
 
 In the `esp32` directory, type `idf.py monitor` to build the project
 
-### Extras
-
-If an issue occurs with
-
-
-## Tools
-
-
-
 ## File Layout
     scripts - Useful project related scripts
     docs - documentation and datasheets
-    control - control loop codebase
+    common - common codebase
         src - source code for control loop
         test - unit tests for control loop
         sim - simulation of control loop

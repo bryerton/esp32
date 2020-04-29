@@ -12,65 +12,71 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
-#include <board.h>
 #include <board_sw.h>
 
 void sw_init(board_dev_sw_t* sw, hal_i2c_dev_t i2c_dev) {
   assert(sw);
-  if (!sw) {
-    return;
-  }
 
-  sw->i2c_dev = i2c_dev;
-  sw->status = BOARD_DEV_NOT_READY;
+  if (sw != NULL) {
+    sw->i2c_dev = i2c_dev;
+    sw->status = BOARD_DEV_NOT_READY;
+  }
 }
 
 board_dev_status_t sw_set_channel(board_dev_sw_t* sw, uint8_t ch) {
+  board_dev_status_t retval;
   hal_err_t res;
 
   assert(sw);
-  if (!sw) {
-    return BOARD_DEV_NOT_READY;
+
+  retval = BOARD_DEV_NOT_READY;
+
+  if (sw != NULL) {
+    // Select the channel on the I2C switch that has the desired sensor on it
+    res = tca9548a_write_channel(hal_i2c_get_config(HAL_I2C_DEV_SWITCH), ch);
+    if (res == HAL_OK) {
+      sw->status = BOARD_DEV_READY;
+    }
+    retval = sw->status;
   }
 
-  // Select the channel on the I2C switch that has the desired sensor on it
-  res = tca9548a_write_channel(hal_i2c_get_config(HAL_I2C_DEV_SWITCH), ch);
-  if (res == HAL_OK) {
-    sw->status = BOARD_DEV_READY;
-  } else {
-    sw->status = BOARD_DEV_NOT_READY;
-  }
-
-  return sw->status;
+  return retval;
 }
 
 board_dev_status_t sw_get_channel(board_dev_sw_t* sw, uint8_t* ch) {
+  board_dev_status_t retval;
   hal_err_t res;
 
-  assert(sw && ch);
-  if (!ch || !sw) {
-    return BOARD_DEV_NOT_READY;
+  assert(sw);
+  assert(ch);
+
+  retval = BOARD_DEV_NOT_READY;
+
+  if ((ch != NULL) && (sw != NULL)) {
+    // Get the current channel from the switch
+    res = tca9548a_read_channel(hal_i2c_get_config(HAL_I2C_DEV_SWITCH), ch);
+    if (res == HAL_OK) {
+      sw->status = BOARD_DEV_READY;
+    }
+    retval = sw->status;
   }
 
-  // Get the current channel from the switch
-  res = tca9548a_read_channel(hal_i2c_get_config(HAL_I2C_DEV_SWITCH), ch);
-  if (res == HAL_OK) {
-    sw->status = BOARD_DEV_READY;
-  } else {
-    sw->status = BOARD_DEV_NOT_READY;
-  }
-
-  return sw->status;
+  return retval;
 }
 
 board_dev_status_t sw_get_status(const board_dev_sw_t* sw) {
+  board_dev_status_t retval;
+
   assert(sw);
-  if (!sw) {
-    return BOARD_DEV_NOT_READY;
+
+  retval = BOARD_DEV_NOT_READY;
+
+  if (sw != NULL) {
+    retval = sw->status;
   }
 
-  return sw->status;
+  return retval;
 }

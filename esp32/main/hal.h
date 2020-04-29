@@ -12,11 +12,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
-#ifndef ESP32_MAIN_HAL_INTERFACE_H_
-#define ESP32_MAIN_HAL_INTERFACE_H_
+#ifndef ESP32_MAIN_HAL_H_
+#define ESP32_MAIN_HAL_H_
 
 #include <driver/gpio.h>
 #include <driver/i2c.h>
@@ -41,28 +41,28 @@ extern "C" {
 #define HAL_I2C_MASTER_SDA_IO_PIN 23
 
 /** 400kHz I2C bus master */
-#define HAL_I2C_MASTER_FREQ 400000
+#define HAL_I2C_MASTER_FREQ 400000u
 
 /** I2C is in APB 80MHz clock period */
-#define HAL_I2C_TIMEOUT_PERIOD_IN_US(x) ((x) * (I2C_APB_CLK_FREQ / 1000000))
+#define HAL_I2C_TIMEOUT_PERIOD_IN_US(x) ((x) * (I2C_APB_CLK_FREQ / 1000000u))
 
 /** Default I2C timeout period to use */
-#define HAL_I2C_DEFAULT_TIMEOUT_PERIOD HAL_I2C_TIMEOUT_PERIOD_IN_US(10)
+#define HAL_I2C_DEFAULT_TIMEOUT_PERIOD HAL_I2C_TIMEOUT_PERIOD_IN_US(10u)
 
 #define HAL_I2C_PS1_ADDR MS5525DSO_I2C_ADDR_HIGH
 #define HAL_I2C_FS1_ADDR SFM3000_I2C_ADDR
 #define HAL_I2C_SWITCH_ADDR TCA9548A_ADDR_LLL
 
-#define HAL_GPIO_DRV_RSTn_PIN 14
-#define HAL_GPIO_LED1_PIN 13
-#define HAL_GPIO_LED2_PIN 12
-#define HAL_GPIO_DRV_CH4_PIN 32
-#define HAL_GPIO_DRV_CH3_PIN 15
-#define HAL_GPIO_DRV_CH2_PIN 33
-#define HAL_GPIO_DRV_CH1_PIN 27
+#define HAL_GPIO_DRV_RSTn_PIN 14u
+#define HAL_GPIO_LED1_PIN 13u
+#define HAL_GPIO_LED2_PIN 12u
+#define HAL_GPIO_DRV_CH4_PIN 32u
+#define HAL_GPIO_DRV_CH3_PIN 15u
+#define HAL_GPIO_DRV_CH2_PIN 33u
+#define HAL_GPIO_DRV_CH1_PIN 27u
 
-#define HAL_I2C_SWITCH_CH_PS1 (1 << 7)
-#define HAL_I2C_SWITCH_CH_FS1 (1 << 0)
+#define HAL_I2C_SWITCH_CH_PS1 (1u << 7)
+#define HAL_I2C_SWITCH_CH_FS1 (1u << 0)
 
 typedef int64_t hal_timestamp_t;
 
@@ -182,4 +182,4 @@ hal_err_t hal_i2c_read(const hal_i2c_config_t* cfg, uint8_t* buffer,
 }
 #endif
 
-#endif  // ESP32_MAIN_HAL_INTERFACE_H_
+#endif  // ESP32_MAIN_HAL_H_

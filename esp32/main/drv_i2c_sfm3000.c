@@ -12,13 +12,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #include <assert.h>
 #include <hal.h>
 #include <drv_i2c_sfm3000.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 static const uint8_t crc8_table[] = {
     0x00, 0x31, 0x62, 0x53, 0xC4, 0xF5, 0xA6, 0x97, 0xB9, 0x88, 0xDB, 0xEA,
@@ -49,279 +50,244 @@ static hal_err_t read_2byte(const hal_i2c_config_t *cfg, uint16_t *buffer);
 static hal_err_t read_4byte(const hal_i2c_config_t *cfg, uint32_t *buffer);
 
 hal_err_t sfm3000_soft_reset(const hal_i2c_config_t *cfg) {
-  uint8_t cmd[2];
-
-  assert(cfg);
-  if (!cfg) {
-    return HAL_ERR_FAIL;
-  }
-
-  cmd[0] = SFM3000_REG_SOFT_RESET >> 8;
-  cmd[1] = SFM3000_REG_SOFT_RESET & 0xFF;
-
-  return hal_i2c_write(cfg, cmd, sizeof(cmd));
-}
-
-hal_err_t sfm3000_start_flow(const hal_i2c_config_t *cfg) {
-  uint8_t cmd[2];
-
-  assert(cfg);
-  if (!cfg) {
-    return HAL_ERR_FAIL;
-  }
-
-  cmd[0] = SFM3000_REG_START_FLOW >> 8;
-  cmd[1] = SFM3000_REG_START_FLOW & 0xFF;
-
-  return hal_i2c_write(cfg, cmd, sizeof(cmd));
-}
-
-hal_err_t sfm3000_start_temp(const hal_i2c_config_t *cfg) {
-  uint8_t cmd[2];
-
-  assert(cfg);
-  if (!cfg) {
-    return HAL_ERR_FAIL;
-  }
-
-  cmd[0] = SFM3000_REG_START_TEMP >> 8;
-  cmd[1] = SFM3000_REG_START_TEMP & 0xFF;
-
-  return hal_i2c_write(cfg, cmd, sizeof(cmd));
-}
-
-hal_err_t sfm3000_read_flow(const hal_i2c_config_t *cfg, uint16_t *flow_raw) {
   hal_err_t res;
-  uint16_t value;
 
-  assert(cfg && flow_raw);
-  if (!cfg || !flow_raw) {
-    return HAL_ERR_FAIL;
+  assert(cfg);
+
+  res = HAL_ERR_FAIL;
+
+  if (cfg != NULL) {
+    uint8_t cmd[2];
+
+    cmd[0] = SFM3000_REG_SOFT_RESET >> 8;
+    cmd[1] = SFM3000_REG_SOFT_RESET & 0xFFu;
+    res = hal_i2c_write(cfg, cmd, sizeof(cmd));
   }
-
-  *flow_raw = 0.0f;
-
-  res = read_2byte(cfg, &value);
-  if (res != HAL_OK) {
-    return res;
-  }
-
-  *flow_raw = value;
 
   return res;
 }
 
-hal_err_t sfm3000_read_temp(const hal_i2c_config_t *cfg, float *temp) {
+hal_err_t sfm3000_start_flow(const hal_i2c_config_t *cfg) {
   hal_err_t res;
-  uint16_t value;
 
-  assert(cfg && temp);
-  if (!cfg || !temp) {
-    return HAL_ERR_FAIL;
+  assert(cfg);
+
+  res = HAL_ERR_FAIL;
+
+  if (cfg != NULL) {
+    uint8_t cmd[2];
+
+    cmd[0] = SFM3000_REG_START_FLOW >> 8;
+    cmd[1] = SFM3000_REG_START_FLOW & 0xFFu;
+    res = hal_i2c_write(cfg, cmd, sizeof(cmd));
   }
 
-  *temp = 0.0f;
+  return res;
+}
 
-  res = read_2byte(cfg, &value);
-  if (res != HAL_OK) {
-    return res;
+hal_err_t sfm3000_read_flow(const hal_i2c_config_t *cfg, uint16_t *flow_raw) {
+  hal_err_t res;
+
+  assert(cfg);
+  assert(flow_raw);
+
+  res = HAL_ERR_FAIL;
+
+  if ((cfg != NULL) && (flow_raw != NULL)) {
+    uint16_t value;
+
+    res = read_2byte(cfg, &value);
+    if (res == HAL_OK) {
+      *flow_raw = value;
+    }
   }
-
-  // @TODO: Test result of function and manually determine formula. Datasheet
-  // does not specify the temperature format
-  *temp = value;
-
   return res;
 }
 
 hal_err_t sfm3000_read_scale_factor(const hal_i2c_config_t *cfg,
                                     float *scale_factor) {
-  uint8_t cmd[2];
   hal_err_t res;
-  uint16_t value;
 
-  assert(cfg && scale_factor);
-  if (!cfg || !scale_factor) {
-    return HAL_ERR_FAIL;
+  assert(cfg);
+  assert(scale_factor);
+
+  res = HAL_ERR_FAIL;
+
+  if ((cfg != NULL) && (scale_factor != NULL)) {
+    uint8_t cmd[2];
+    uint16_t value;
+
+    cmd[0] = SFM3000_REG_SCALE_FACTOR >> 8;
+    cmd[1] = SFM3000_REG_SCALE_FACTOR & 0xFFu;
+    res = hal_i2c_write(cfg, cmd, sizeof(cmd));
+    if (res == HAL_OK) {
+      res = read_2byte(cfg, &value);
+    }
+
+    if (res == HAL_OK) {
+      *scale_factor = value;
+    }
   }
-
-  *scale_factor = 0;
-
-  cmd[0] = SFM3000_REG_SCALE_FACTOR >> 8;
-  cmd[1] = SFM3000_REG_SCALE_FACTOR & 0xFF;
-
-  res = hal_i2c_write(cfg, cmd, sizeof(cmd));
-  if (res != HAL_OK) {
-    return res;
-  }
-
-  res = read_2byte(cfg, &value);
-  if (res != HAL_OK) {
-    return res;
-  }
-
-  *scale_factor = value;
 
   return res;
 }
 
 hal_err_t sfm3000_read_offset(const hal_i2c_config_t *cfg, float *offset) {
-  uint8_t cmd[2];
   hal_err_t res;
-  uint16_t value;
 
-  assert(cfg && offset);
-  if (!cfg || !offset) {
-    return HAL_ERR_FAIL;
+  assert(cfg);
+  assert(offset);
+
+  res = HAL_ERR_FAIL;
+
+  if ((cfg != NULL) && (offset != NULL)) {
+    uint8_t cmd[2];
+    uint16_t value;
+
+    cmd[0] = SFM3000_REG_OFFSET >> 8;
+    cmd[1] = SFM3000_REG_OFFSET & 0xFFu;
+    res = hal_i2c_write(cfg, cmd, sizeof(cmd));
+    if (res == HAL_OK) {
+      res = read_2byte(cfg, &value);
+    }
+
+    if (res == HAL_OK) {
+      *offset = value;
+    }
   }
-
-  *offset = 0;
-
-  cmd[0] = SFM3000_REG_OFFSET >> 8;
-  cmd[1] = SFM3000_REG_OFFSET & 0xFF;
-
-  res = hal_i2c_write(cfg, cmd, sizeof(cmd));
-  if (res != HAL_OK) {
-    return res;
-  }
-
-  res = read_2byte(cfg, &value);
-  if (res != HAL_OK) {
-    return res;
-  }
-
-  *offset = value;
 
   return res;
 }
 
 hal_err_t sfm3000_read_serial(const hal_i2c_config_t *cfg, uint32_t *serial) {
-  uint8_t cmd[2];
   hal_err_t res;
 
-  assert(cfg && serial);
-  if (!cfg || !serial) {
-    return HAL_ERR_FAIL;
+  assert(cfg);
+  assert(serial);
+
+  res = HAL_ERR_FAIL;
+
+  if ((cfg != NULL) && (serial != NULL)) {
+    uint8_t cmd[2];
+
+    cmd[0] = SFM3000_REG_SERIAL_HI >> 8;
+    cmd[1] = SFM3000_REG_SERIAL_HI & 0xFFu;
+    res = hal_i2c_write(cfg, cmd, sizeof(cmd));
+
+    if (res == HAL_OK) {
+      res = read_4byte(cfg, serial);
+    }
   }
 
-  *serial = 0;
-
-  cmd[0] = SFM3000_REG_SERIAL_HI >> 8;
-  cmd[1] = SFM3000_REG_SERIAL_HI & 0xFF;
-
-  res = hal_i2c_write(cfg, cmd, sizeof(cmd));
-  if (res != HAL_OK) {
-    return res;
-  }
-
-  return read_4byte(cfg, serial);
+  return res;
 }
 
 hal_err_t sfm3000_read_product(const hal_i2c_config_t *cfg, uint32_t *product) {
-  uint8_t cmd[2];
   hal_err_t res;
 
-  assert(cfg && product);
-  if (!cfg || !product) {
-    return HAL_ERR_FAIL;
+  assert(cfg);
+  assert(product);
+
+  res = HAL_ERR_FAIL;
+
+  if ((cfg != NULL) && (product != NULL)) {
+    uint8_t cmd[2];
+
+    cmd[0] = SFM3000_REG_PRODUCT_HI >> 8;
+    cmd[1] = SFM3000_REG_PRODUCT_HI & 0xFFu;
+    res = hal_i2c_write(cfg, cmd, sizeof(cmd));
+    if (res == HAL_OK) {
+      res = read_4byte(cfg, product);
+    }
   }
-
-  *product = 0;
-
-  cmd[0] = SFM3000_REG_PRODUCT_HI >> 8;
-  cmd[1] = SFM3000_REG_PRODUCT_HI & 0xFF;
-
-  res = hal_i2c_write(cfg, cmd, sizeof(cmd));
-  if (res != HAL_OK) {
-    return res;
-  }
-
-  return read_4byte(cfg, product);
+  return res;
 }
 
-void sfm3000_convert_to_slm(uint16_t flow_raw,
-                            const sfm3000_settings_t *settings, float *flow) {
-  assert(settings && flow);
-  if (!settings || !flow) {
-    return;
+hal_err_t sfm3000_convert_to_slm(uint16_t flow_raw,
+                                 const sfm3000_settings_t *settings,
+                                 float *flow) {
+  hal_err_t res;
+
+  assert(settings);
+  assert(flow);
+
+  res = HAL_ERR_FAIL;
+
+  if ((settings != NULL) && (flow != NULL)) {
+    // Protect against divide by zero by testing for a reasonable scale factor
+    // As the given scale factors are in the ~140 range, this should never occur
+    // And can be considered an error
+    if (settings->scale_factor > 1.0f) {
+      *flow = (flow_raw - settings->offset) / settings->scale_factor;
+      res = HAL_OK;
+    }
   }
 
-  // Protect against divide by zero
-  // As the given scale factors are in the ~140 range, this should never occur
-  // And can be considered an error
-  if (settings->scale_factor > 1.0f) {
-    *flow = (flow_raw - settings->offset) / settings->scale_factor;
-  } else {
-    *flow = 0.0f;
-  }
+  return res;
 }
 
 static hal_err_t read_2byte(const hal_i2c_config_t *cfg, uint16_t *buffer) {
   hal_err_t res;
-  uint8_t buff[3];  // First two bytes are data, third is crc
 
-  assert(cfg && buffer);
-  if (!cfg || !buffer) {
-    return HAL_ERR_FAIL;
+  assert(cfg);
+  assert(buffer);
+
+  res = HAL_ERR_FAIL;
+
+  if ((cfg != NULL) && (buffer != NULL)) {
+    uint8_t buff[3];  // First two bytes are data, third is crc
+
+    res = hal_i2c_read(cfg, buff, sizeof(buff));
+    // Check CRC (third byte) against calculated CRC value
+    if (res == HAL_OK) {
+      if (crc8(buff, 2) == buff[2]) {
+        *buffer = (buff[0] << 8) | buff[1];  // MSB first
+      } else {
+        res = HAL_ERR_FAIL;
+      }
+    }
   }
-
-  *buffer = 0;
-
-  res = hal_i2c_read(cfg, buff, sizeof(buff));
-  if (res != HAL_OK) {
-    return res;
-  }
-
-  // Check CRC (third byte) against calculated CRC value
-  if (crc8(buff, 2) != buff[2]) {
-    return HAL_ERR_FAIL;
-  }
-
-  // MSB first
-  *buffer = (buff[0] << 8) | buff[1];
 
   return res;
 }
 
 static hal_err_t read_4byte(const hal_i2c_config_t *cfg, uint32_t *buffer) {
   hal_err_t res;
-  uint8_t buff[6];
 
-  assert(cfg && buffer);
-  if (!cfg || !buffer) {
-    return HAL_ERR_FAIL;
+  assert(cfg);
+  assert(buffer);
+
+  res = HAL_ERR_FAIL;
+
+  if ((cfg != NULL) && (buffer != NULL)) {
+    uint8_t buff[6];
+
+    res = hal_i2c_read(cfg, buff, sizeof(buff));
+    if (res == HAL_OK) {
+      // Check CRCs (third byte and sixth byte) against calculated crc values
+      if ((crc8(&buff[0], 2) == buff[2]) && (crc8(&buff[3], 2) == buff[5])) {
+        // MSB first, make sure to not stuff the CRC bytes in!
+        *buffer = (buff[0] << 24) | (buff[1] << 16) | (buff[3] << 8) | buff[4];
+      } else {
+        res = HAL_ERR_FAIL;
+      }
+    }
   }
-
-  *buffer = 0;
-
-  res = hal_i2c_read(cfg, buff, sizeof(buff));
-  if (res != HAL_OK) {
-    return res;
-  }
-
-  // Check CRCs (third byte and sixth byte) against calculated crc values
-  if ((crc8(&buff[0], 2) != buff[2]) || (crc8(&buff[3], 2) != buff[5])) {
-    return HAL_ERR_FAIL;
-  }
-
-  // MSB first, make sure to not stuff the CRC bytes in!
-  *buffer = (buff[0] << 24) | (buff[1] << 16) | (buff[3] << 8) | buff[4];
 
   return res;
 }
 
 static uint8_t crc8(const uint8_t *buff, uint8_t len) {
-  uint8_t n;
   uint8_t crc;
 
   assert(buff);
-  if (!buff) {
-    return 0;
-  }
 
   crc = 0x00;
-  for (n = 0; n < len; n++) {
-    crc = crc8_table[crc ^ buff[n]];
+
+  if (buff != NULL) {
+    for (uint8_t n = 0; n < len; n++) {
+      crc = crc8_table[crc ^ buff[n]];
+    }
   }
 
   return crc;

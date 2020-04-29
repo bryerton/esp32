@@ -22,29 +22,21 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    - name: Install required packages
-      run: |
-        sudo apt install --yes --force-yes cmake ninja-build gperf flex bison python-pip doxygen graphviz texlive-latex-base
-
     # Initialize git submodules for thirdparty repositories (Unity and ESP-IDF)
     - name: Update git submodules
       run: |
         git submodule init
         git submodule update --init --recursive
 
-    # Setup ESP-IDF
-    - name: Install ESP-IDF tools
-      run: |
-        python -m pip uninstall virtualenv
-        python -m pip install virtualenv==16.7.9
-        ./thirdparty/esp-idf/install.sh
-
     # Run actual build
     - name: Perform build
       run: |
-        source thirdparty/esp-idf/export.sh
-        cd esp32
-        idf.py build
+        export IDF_PATH=/root/esp/esp-idf
+        export PATH="/root/.espressif/tools/xtensa-esp32-elf/1.22.0-80-g6c4433a-5.2.0/xtensa-esp32-elf/bin:$PATH"
+        export PATH="$IDF_PATH/tools:$PATH"
+        /usr/bin/python -m pip install --user -r /root/esp/esp-idf/requirements.txt
+        cd /github/workspace/esp32
+        idf.py fullclean build
 
     - uses: actions/upload-artifact@v1
       with:

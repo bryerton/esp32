@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #include <freertos/FreeRTOS.h>
@@ -23,9 +23,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <control.h>
 #include <esp_system.h>
 #include <esp_task_wdt.h>
-#include <link.h>
-#include <main.h>
+#include <serial_link.h>
 #include <nvs_flash.h>
+#include "main.h"
 
 static StackType_t stackbuffer_control[TASK_CONTROL_STACK_SIZE];
 static StaticTask_t taskbuffer_control;
@@ -35,13 +35,13 @@ static StackType_t stackbuffer_board[TASK_BOARD_STACK_SIZE];
 static StaticTask_t taskbuffer_board;
 static TaskHandle_t task_board_handle;
 
-static StackType_t stackbuffer_link[TASK_LINK_STACK_SIZE];
-static StaticTask_t taskbuffer_link;
-static TaskHandle_t task_link_handle;
+static StackType_t stackbuffer_serial_link[TASK_SERIAL_LINK_STACK_SIZE];
+static StaticTask_t taskbuffer_serial_link;
+static TaskHandle_t task_serial_link_handle;
 
 static void task_control(void* param);
 static void task_board(void* param);
-static void task_link(void* param);
+static void task_serial_link(void* param);
 
 /**
  * @brief Entry function
@@ -52,8 +52,8 @@ void app_main(void) {
 
   // Initialize NVS
   esp_err_t ret = nvs_flash_init();
-  if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
-      ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+  if ((ret == ESP_ERR_NVS_NO_FREE_PAGES) ||
+      (ret == ESP_ERR_NVS_NEW_VERSION_FOUND)) {
     ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_flash_init();
   }
@@ -61,69 +61,71 @@ void app_main(void) {
 
   hal_init();
 
+  // Create the Controller task
   task_control_handle = xTaskCreateStaticPinnedToCore(
       &task_control, TASK_CONTROL_NAME, TASK_CONTROL_STACK_SIZE, NULL,
       TASK_CONTROL_PRIORITY, stackbuffer_control, &taskbuffer_control,
       TASK_CONTROL_PINNED_CORE);
 
+  // Create the Board task
   task_board_handle = xTaskCreateStaticPinnedToCore(
       &task_board, TASK_BOARD_NAME, TASK_BOARD_STACK_SIZE, NULL,
       TASK_BOARD_PRIORITY, stackbuffer_board, &taskbuffer_board,
       TASK_BOARD_PINNED_CORE);
 
-  task_link_handle = xTaskCreateStaticPinnedToCore(
-      &task_link, TASK_LINK_NAME, TASK_LINK_STACK_SIZE, NULL,
-      TASK_LINK_PRIORITY, stackbuffer_link, &taskbuffer_link,
-      TASK_LINK_PINNED_CORE);
+  // Create the Serial Link task
+  task_serial_link_handle = xTaskCreateStaticPinnedToCore(
+      &task_serial_link, TASK_SERIAL_LINK_NAME, TASK_SERIAL_LINK_STACK_SIZE, NULL,
+      TASK_SERIAL_LINK_PRIORITY, stackbuffer_serial_link, &taskbuffer_serial_link,
+      TASK_SERIAL_LINK_PINNED_CORE);
 
   esp_task_wdt_delete(NULL);
 }
 
 static void task_control(void* param) {
-  static int64_t last_time;
   TickType_t xLastWakeTime;
-  int64_t current_time;
+  control_t control;
 
-  control_init();
+  esp_task_wdt_add(task_control_handle);
+  control_init(&control);
 
   xLastWakeTime = xTaskGetTickCount();
-  last_time = esp_timer_get_time();
   for (;;) {
-    current_time = hal_get_timestamp();
-    control_update(current_time, current_time - last_time);
-    last_time = current_time;
-
+    esp_task_wdt_reset();
+    control_update(&control);
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(TASK_CONTROL_INTERVAL_MS));
   }
+  esp_task_wdt_delete(task_control_handle);
 }
 
 static void task_board(void* param) {
   TickType_t xLastWakeTime;
   board_t board;
 
+  esp_task_wdt_add(task_board_handle);
   board_init(&board);
 
   xLastWakeTime = xTaskGetTickCount();
   for (;;) {
+    esp_task_wdt_reset();
     board_update(&board);
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(TASK_BOARD_INTERVAL_MS));
   }
+  esp_task_wdt_delete(task_board_handle);
 }
 
-static void task_link(void* param) {
-  static int64_t last_time;
+static void task_serial_link(void* param) {
   TickType_t xLastWakeTime;
-  int64_t current_time;
+  serial_link_t serial_link;
 
-  link_init();
+  esp_task_wdt_add(task_serial_link_handle);
+  serial_link_init(&serial_link);
 
   xLastWakeTime = xTaskGetTickCount();
-  last_time = esp_timer_get_time();
   for (;;) {
-    current_time = hal_get_timestamp();
-    link_update(current_time, current_time - last_time);
-    last_time = current_time;
-
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(TASK_LINK_INTERVAL_MS));
+    esp_task_wdt_reset();
+    serial_link_update(&serial_link);
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(TASK_SERIAL_LINK_INTERVAL_MS));
   }
+  esp_task_wdt_delete(task_serial_link_handle);
 }

@@ -3,3 +3,9 @@ esp32/build
 esp32/sdkconfig
 esp32/docs/compiled
 esp32/sdkconfig.old
+esp32/build_ceedling
+
+# Sadly each person will have to source this file themselves
+esp32/report/misra/misra_rules.txt
+*.xml
+*.html

@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #ifndef ESP32_MAIN_DRV_I2C_MS5525DSO_H_
@@ -34,35 +34,35 @@ extern "C" {
  */
 
 /** If CSB (CSn) pin is low, the MS5525DSO has this I2C address */
-#define MS5525DSO_I2C_ADDR_LOW 0x77
+#define MS5525DSO_I2C_ADDR_LOW 0x77u
 
 /** If CSB (CSn) pin is high, the MS5525DSO has this I2C address */
-#define MS5525DSO_I2C_ADDR_HIGH 0x76
+#define MS5525DSO_I2C_ADDR_HIGH 0x76u
 
 /** Reset register is required to be selected prior to normal operation */
-#define MS5525DSO_REG_RESET 0x1E
+#define MS5525DSO_REG_RESET 0x1Eu
 
 /** After a convert request to D1 or D2 is done, write to this register to
  * request readback */
-#define MS5525DSO_REG_ADC_READ 0x00
+#define MS5525DSO_REG_ADC_READ 0x00u
 
 /** PROM Address range is 0xA0 to 0xAE */
-#define MS5525DSO_REG_PROM_READ_BASE 0xA0
+#define MS5525DSO_REG_PROM_READ_BASE 0xA0u
 
 /** Mask of the PROM address bits */
-#define MS5525DSO_REG_PROM_ADDR_MASK 0x7
+#define MS5525DSO_REG_PROM_ADDR_MASK 0x7u
 
 /** Offset of PROM address bits */
-#define MS5525DSO_REG_PROM_ADDR_OFST 1
+#define MS5525DSO_REG_PROM_ADDR_OFST 1u
 
 /** Number of PROM bytes per address location. Stored MSB first */
-#define MS5525DSO_NUM_PROM_BYTES 2
+#define MS5525DSO_NUM_PROM_BYTES 2u
 
 /** Number of bytes to readback for ADC communication for D1 and D2 */
-#define MS5525DSO_NUM_ADC_BYTES 3
+#define MS5525DSO_NUM_ADC_BYTES 3u
 
 /** Number of PROM address registers */
-#define MS5525DSO_NUM_PROM_ADDR 8
+#define MS5525DSO_NUM_PROM_ADDR 8u
 
 /** Utility function to convert compensated pressure to PSI */
 #define MS5525DSO_CONVERT_P_TO_FLOAT(x) ((float)(x) / 10000.0f)
@@ -71,45 +71,34 @@ extern "C" {
 #define MS5525DSO_CONVERT_T_TO_FLOAT(x) ((float)(x) / 100.0f)
 
 /** Qx Coefficients Matrix by Pressure Range */
-#define MS5525DSO_QX_FOR_PP001DS() \
-  { .Q1 = 15, .Q2 = 17, .Q3 = 7, .Q4 = 5, .Q5 = 7, .Q6 = 21 }
-#define MS5525DSO_QX_FOR_PP002GS() \
-  { .Q1 = 14, .Q2 = 16, .Q3 = 8, .Q4 = 6, .Q5 = 7, .Q6 = 22 }
-#define MS5525DSO_QX_FOR_PP002DS() \
-  { .Q1 = 16, .Q2 = 18, .Q3 = 6, .Q4 = 4, .Q5 = 7, .Q6 = 22 }
-#define MS5525DSO_QX_FOR_PP005GS() \
-  { .Q1 = 16, .Q2 = 17, .Q3 = 6, .Q4 = 5, .Q5 = 7, .Q6 = 21 }
-#define MS5525DSO_QX_FOR_PP005DS() \
-  { .Q1 = 17, .Q2 = 19, .Q3 = 5, .Q4 = 3, .Q5 = 7, .Q6 = 22 }
-#define MS5525DSO_QX_FOR_PP015GS() \
-  { .Q1 = 16, .Q2 = 17, .Q3 = 6, .Q4 = 5, .Q5 = 7, .Q6 = 22 }
-#define MS5525DSO_QX_FOR_PP015AS() \
-  { .Q1 = 16, .Q2 = 17, .Q3 = 6, .Q4 = 5, .Q5 = 7, .Q6 = 22 }
-#define MS5525DSO_QX_FOR_PP015DS() \
-  { .Q1 = 17, .Q2 = 19, .Q3 = 5, .Q4 = 3, .Q5 = 7, .Q6 = 22 }
-#define MS5525DSO_QX_FOR_PP030AS() \
-  { .Q1 = 17, .Q2 = 18, .Q3 = 5, .Q4 = 4, .Q5 = 7, .Q6 = 22 }
-#define MS5525DSO_QX_FOR_PP030GS() \
-  { .Q1 = 17, .Q2 = 18, .Q3 = 5, .Q4 = 4, .Q5 = 7, .Q6 = 22 }
-#define MS5525DSO_QX_FOR_PP030DS() \
-  { .Q1 = 18, .Q2 = 21, .Q3 = 4, .Q4 = 1, .Q5 = 7, .Q6 = 22 }
+#define MS5525DSO_QX_FOR_PP001DS() { .Q1 = 15u, .Q2 = 17u, .Q3 = 7u, .Q4 = 5u, .Q5 = 7u, .Q6 = 21u }
+#define MS5525DSO_QX_FOR_PP002GS() { .Q1 = 14u, .Q2 = 16u, .Q3 = 8u, .Q4 = 6u, .Q5 = 7u, .Q6 = 22u }
+#define MS5525DSO_QX_FOR_PP002DS() { .Q1 = 16u, .Q2 = 18u, .Q3 = 6u, .Q4 = 4u, .Q5 = 7u, .Q6 = 22u }
+#define MS5525DSO_QX_FOR_PP005GS() { .Q1 = 16u, .Q2 = 17u, .Q3 = 6u, .Q4 = 5u, .Q5 = 7u, .Q6 = 21u }
+#define MS5525DSO_QX_FOR_PP005DS() { .Q1 = 17u, .Q2 = 19u, .Q3 = 5u, .Q4 = 3u, .Q5 = 7u, .Q6 = 22u }
+#define MS5525DSO_QX_FOR_PP015GS() { .Q1 = 16u, .Q2 = 17u, .Q3 = 6u, .Q4 = 5u, .Q5 = 7u, .Q6 = 22u }
+#define MS5525DSO_QX_FOR_PP015AS() { .Q1 = 16u, .Q2 = 17u, .Q3 = 6u, .Q4 = 5u, .Q5 = 7u, .Q6 = 22u }
+#define MS5525DSO_QX_FOR_PP015DS() { .Q1 = 17u, .Q2 = 19u, .Q3 = 5u, .Q4 = 3u, .Q5 = 7u, .Q6 = 22u }
+#define MS5525DSO_QX_FOR_PP030AS() { .Q1 = 17u, .Q2 = 18u, .Q3 = 5u, .Q4 = 4u, .Q5 = 7u, .Q6 = 22u }
+#define MS5525DSO_QX_FOR_PP030GS() { .Q1 = 17u, .Q2 = 18u, .Q3 = 5u, .Q4 = 4u, .Q5 = 7u, .Q6 = 22u }
+#define MS5525DSO_QX_FOR_PP030DS() { .Q1 = 18u, .Q2 = 21u, .Q3 = 4u, .Q4 = 1u, .Q5 = 7u, .Q6 = 22u }
 
 /** @brief Channels that can be selected for conversion
  */
-typedef enum ms5525dso_ch_e {
+typedef enum ms5525dso_ch_t {
   MS5525DSO_CH_D1_PRESSURE,    //!< ADC Channel D1 is pressure
   MS5525DSO_CH_D2_TEMPERATURE  //!< ADC Channel D2 is temperature
-} ms5525dso_ch_e;
+} ms5525dso_ch_t;
 
 /** @brief Oversample rates that can be selected for conversion
  */
-typedef enum ms5525dso_osr_e {
+typedef enum ms5525dso_osr_t {
   MS5525DSO_OSR256,   //!< 256 samples
   MS5525DSO_OSR512,   //!< 512 samples
   MS5525DSO_OSR1024,  //!< 1024 samples
   MS5525DSO_OSR2048,  //!< 2048 samples
   MS5525DSO_OSR4096   //!< 4096 samples
-} ms5525dso_osr_e;
+} ms5525dso_osr_t;
 
 /** @brief Coefficient table for storage of PROM values
  */
@@ -120,12 +109,12 @@ typedef struct ms5525dso_coeff_t {
 /** @brief Qx coefficient table
  */
 typedef struct ms5525dso_qx_t {
-  int8_t Q1;  //!< Amount to bitshift when performing calculations
-  int8_t Q2;  //!< Amount to bitshift when performing calculations
-  int8_t Q3;  //!< Amount to bitshift when performing calculations
-  int8_t Q4;  //!< Amount to bitshift when performing calculations
-  int8_t Q5;  //!< Amount to bitshift when performing calculations
-  int8_t Q6;  //!< Amount to bitshift when performing calculations
+  int64_t Q1;  //!< Amount to bitshift when performing calculations
+  int64_t Q2;  //!< Amount to bitshift when performing calculations
+  int64_t Q3;  //!< Amount to bitshift when performing calculations
+  int64_t Q4;  //!< Amount to bitshift when performing calculations
+  int64_t Q5;  //!< Amount to bitshift when performing calculations
+  int64_t Q6;  //!< Amount to bitshift when performing calculations
 } ms5525dso_qx_t;
 
 /** @brief Perform soft reset of device
@@ -202,7 +191,7 @@ hal_err_t ms5525dso_read_all_coeff(const hal_i2c_config_t* cfg,
  * @return HAL_OK if no error, hal_err_t value otherwise
  */
 hal_err_t ms5525dso_start_ch_convert(const hal_i2c_config_t* cfg,
-                                     ms5525dso_ch_e ch, ms5525dso_osr_e osr);
+                                     ms5525dso_ch_t ch, ms5525dso_osr_t osr);
 
 /** @brief Calculate the CRC4 of a coefficient table
  *

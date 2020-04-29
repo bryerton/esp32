@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #ifndef ESP32_MAIN_MAIN_H_
@@ -36,11 +36,11 @@ extern "C" {
 #define TASK_BOARD_PINNED_CORE 0
 #define TASK_BOARD_NAME "board"
 
-#define TASK_LINK_STACK_SIZE 8192
-#define TASK_LINK_PRIORITY 6
-#define TASK_LINK_INTERVAL_MS 10
-#define TASK_LINK_PINNED_CORE 0
-#define TASK_LINK_NAME "link"
+#define TASK_SERIAL_LINK_STACK_SIZE 8192
+#define TASK_SERIAL_LINK_PRIORITY 6
+#define TASK_SERIAL_LINK_INTERVAL_MS 10
+#define TASK_SERIAL_LINK_PINNED_CORE 0
+#define TASK_SERIAL_LINK_NAME "serial_link"
 
 #ifdef __cplusplus
 }

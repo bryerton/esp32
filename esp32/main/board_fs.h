@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #ifndef ESP32_MAIN_BOARD_FS_H_
@@ -20,7 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <hal.h>
-#include <board.h>
 #include <board_dev.h>
 #include <drv_i2c_sfm3000.h>
 
@@ -42,7 +41,6 @@ extern "C" {
 #define BOARD_FS_CONVERSION_TIME 1000
 
 typedef enum flow_sensor_state_t {
-  FS_SENSOR_ST_ERR,
   FS_SENSOR_ST_RESET,
   FS_SENSOR_ST_CONFIG,
   FS_SENSOR_ST_DISCARD_FIRST_FLOW,

@@ -12,16 +12,34 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
-#include <link.h>
+#ifndef ESP32_MAIN_DRV_I2C_SFM3019_H_
+#define ESP32_MAIN_DRV_I2C_SFM3019_H_
+
 #include <hal.h>
+#include <stdint.h>
 
-void link_init(void) {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+/**
+ * @defgroup SFM3019 SFM3019
+ * @ingroup driver_i2c
+ * @brief I2C Driver for the Sensirion, SFM3019, 14-bit Low Pressure Drop
+ * Digital Flow Meter
+ * @{
+ */
+
+/** @} */
+
+#ifdef __cplusplus
 }
+#endif
 
-void link_update(hal_timestamp_t ts_current, hal_timestamp_t ts_delta) {
+#endif  // ESP32_MAIN_DRV_I2C_SFM3019_H_
 
-}
+
+#endif // DRV_I2C_SFM3019_H_

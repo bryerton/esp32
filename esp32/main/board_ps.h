@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #ifndef ESP32_MAIN_BOARD_PS_H_
@@ -20,7 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <hal.h>
-#include <board.h>
 #include <board_dev.h>
 #include <drv_i2c_ms5525dso.h>
 
@@ -42,7 +41,6 @@ extern "C" {
 #define BOARD_PS_CONVERSION_TIME 2000
 
 typedef enum pressor_sensor_state_t {
-  PS_SENSOR_ST_ERR,
   PS_SENSOR_ST_RESET,
   PS_SENSOR_ST_CONFIG,
   PS_SENSOR_ST_READ_CH1,

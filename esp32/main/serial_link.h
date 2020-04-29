@@ -12,11 +12,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
-#ifndef ESP32_MAIN_LINK_H_
-#define ESP32_MAIN_LINK_H_
+#ifndef ESP32_MAIN_SERIAL_LINK_H_
+#define ESP32_MAIN_SERIAL_LINK_H_
 
 #include <stdint.h>
 #include <hal.h>
@@ -25,12 +25,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 extern "C" {
 #endif
 
-void link_init(void);
+typedef struct serial_link_t {
+  uint8_t blank;
+} serial_link_t;
 
-void link_update(hal_timestamp_t ts_current, hal_timestamp_t ts_delta);
+void serial_link_init(serial_link_t* link);
+
+void serial_link_update(serial_link_t* link);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // ESP32_MAIN_LINK_H_
+#endif  // ESP32_MAIN_SERIAL_LINK_H_

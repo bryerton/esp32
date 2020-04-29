@@ -12,14 +12,41 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #include <control.h>
-#include <hal.h>
+#include <board.h>
+#include <stdlib.h>
 
-void control_init(void) {
+void control_init(control_t* control) {
+  assert(control);
+
+  if (control != NULL) {
+    control->state = CONTROL_STATE_RESET;
+    control->settings.mode = CONTROL_MODE_OFF;
+  }
 }
 
-void control_update(hal_timestamp_t ts_current, hal_timestamp_t ts_delta) {
+void control_update(control_t* control) {
+  assert(control);
+
+  if (control != NULL) {
+    switch (control->state) {
+      case CONTROL_STATE_RESET:
+        break;
+      case CONTROL_STATE_INIT:
+        break;
+      case CONTROL_STATE_START:
+        break;
+      case CONTROL_STATE_RUN:
+        break;
+      case CONTROL_STATE_STOP:
+        break;
+      case CONTROL_STATE_SHUTDOWN:
+        break;
+      default:
+        break;
+    }
+  }
 }
