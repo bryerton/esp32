@@ -16,10 +16,10 @@ along with this program.  If not, see www.gnu.org/licenses/.
 */
 
 #include <assert.h>
-#include <hal.h>
-#include <drv_i2c_sfm3000.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <hal.h>
+#include <drv_i2c_sfm3000.h>
 
 static const uint8_t crc8_table[] = {
     0x00, 0x31, 0x62, 0x53, 0xC4, 0xF5, 0xA6, 0x97, 0xB9, 0x88, 0xDB, 0xEA,
