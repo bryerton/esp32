@@ -40,68 +40,72 @@ extern "C" {
 /** Wait 2ms for conversion to finish */
 #define BOARD_PS_CONVERSION_TIME 2000
 
-typedef enum pressor_sensor_state_t {
+typedef enum ps_state_t {
   PS_SENSOR_ST_RESET,
   PS_SENSOR_ST_CONFIG,
   PS_SENSOR_ST_READ_CH1,
   PS_SENSOR_ST_READ_CH2,
-} pressor_sensor_state_t;
+} ps_state_t;
+
+typedef struct ps_values_t {
+  hal_timestamp_t ts;
+  float pressure;
+  float temp;
+} ps_values_t;
+
+typedef struct ps_info_t {
+  ms5525dso_osr_t osr;
+  ms5525dso_qx_t qx;
+  ms5525dso_coeff_t coeff;  //!< Coefficient table to use for calculations
+} ps_info_t;
 
 typedef struct board_dev_ps_t {
+  hal_timestamp_t
+      ts_current_update;  //!< Timestamp of when current update started
+  hal_timestamp_t
+      ts_last_update;  //!< Timestamp of when last completed update started
   hal_timestamp_t ts_state;  //!< Timestamp of when current state was entered
   hal_i2c_dev_t i2c_dev;     //!< I2C device to use
   board_dev_status_t status;
   uint32_t d1;
   uint32_t d2;
+  ms5525dso_osr_t osr;
   ms5525dso_qx_t qx;
-  ms5525dso_coeff_t coeff;        //!< Coefficient table to use for calculations
-  float pressure;                 //!< Compensated pressure in PSI
-  float temp;                     //!< Compensated temperature in C
-  pressor_sensor_state_t state;  //!< Internal state
+  ms5525dso_coeff_t coeff;  //!< Coefficient table to use for calculations
+  float pressure;           //!< Compensated pressure in PSI
+  float temp;               //!< Compensated temperature in C
+  ps_state_t state;         //!< Internal state
+  hal_timestamp_t temp_update_rate;
 } board_dev_ps_t;
 
 /**
- * @brief
+ * @brief Initialize pressure sensor
  *
- * @param ps
+ * @param ps Pressure sensor struct
  * @param i2c_dev
- * @param qx
+ * @param osr Over Sample rate (OSR) to use
+ * @param qx Qx Coefficient values to use, should chosen by part number
  */
-void ps_init(board_dev_ps_t* ps, hal_i2c_dev_t i2c_dev, const ms5525dso_qx_t* qx);
+void ps_init(board_dev_ps_t* ps, hal_i2c_dev_t i2c_dev, ms5525dso_osr_t osr,
+             const ms5525dso_qx_t* qx);
 
 /**
  * @brief
  *
  * @param ps
+ * @param values
  * @return board_dev_status_t
  */
-board_dev_status_t ps_update(board_dev_ps_t* ps);
+board_dev_status_t ps_update(board_dev_ps_t* ps, ps_values_t* values);
 
 /**
  * @brief
  *
  * @param ps
- * @return board_dev_status_t
+ * @param info
+ * @return ps_info_t*
  */
-board_dev_status_t ps_get_status(board_dev_ps_t* ps);
-
-/**
- * @brief
- *
- * @param ps
- * @param pressure
- * @return board_dev_status_t
- */
-board_dev_status_t ps_get_pressure(board_dev_ps_t* ps, float* pressure);
-
-/**
- * @brief
- *
- * @param ps
- * @param temperature
- * @return board_dev_status_t
- */
-board_dev_status_t ps_get_temp(board_dev_ps_t* ps, float* temperature);
+ps_info_t* ps_get_info(board_dev_ps_t* ps, ps_info_t* info);
 
 /** @} */
 

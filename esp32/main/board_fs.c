@@ -40,16 +40,23 @@ void fs_init(board_dev_fs_t* fs, hal_i2c_dev_t i2c_dev,
   }
 }
 
-void fs_set_settings(board_dev_fs_t* fs, const sfm3000_settings_t* settings) {
+board_dev_status_t fs_set_settings(board_dev_fs_t* fs, const sfm3000_settings_t* settings) {
+  board_dev_status_t retval;
+
   assert(fs);
   assert(settings);
 
+  retval = BOARD_DEV_NOT_READY;
+
   if ((fs != NULL) && (settings != NULL)) {
     memcpy(&fs->settings, settings, sizeof(sfm3000_settings_t));
+    retval = fs->status;
   }
+
+  return retval;
 }
 
-board_dev_status_t fs_update(board_dev_fs_t* fs) {
+board_dev_status_t fs_update(board_dev_fs_t* fs, fs_values_t* values) {
   hal_err_t res;
   board_dev_status_t retval;
 
@@ -57,7 +64,7 @@ board_dev_status_t fs_update(board_dev_fs_t* fs) {
 
   retval = BOARD_DEV_NOT_READY;
 
-  if (fs != NULL) {
+  if ((fs != NULL) && (values != NULL)) {
     switch (fs->state) {
       case FS_SENSOR_ST_RESET:
         fs->status = BOARD_DEV_NOT_READY;
@@ -114,6 +121,9 @@ board_dev_status_t fs_update(board_dev_fs_t* fs) {
           }
 
           if (res == HAL_OK) {
+            // last conversion time is identical to current ts_state
+            values->ts = fs->ts_state;
+            values->flow = fs->flow;
             fs->status = BOARD_DEV_READY;
             update_state(fs, FS_SENSOR_ST_READ_FLOW);
           } else {
@@ -134,34 +144,16 @@ board_dev_status_t fs_update(board_dev_fs_t* fs) {
   return retval;
 }
 
-board_dev_status_t fs_get_flow(board_dev_fs_t* fs, float* flow) {
-  board_dev_status_t res;
-
+fs_info_t* fs_get_info(board_dev_fs_t* fs, fs_info_t* info) {
   assert(fs);
-  assert(flow);
+  assert(info);
 
-  res = BOARD_DEV_NOT_READY;
-
-  if ((fs != NULL) && (flow != NULL)) {
-    *flow = fs->flow;
-    res = fs->status;
+  if ((fs != NULL) && (info != NULL)) {
+    info->product = fs->product;
+    info->serial = fs->serial;
   }
 
-  return res;
-}
-
-board_dev_status_t fs_get_status(board_dev_fs_t* fs) {
-  board_dev_status_t res;
-
-  assert(fs);
-
-  res = BOARD_DEV_NOT_READY;
-
-  if (fs != NULL) {
-    res = fs->status;
-  }
-
-  return res;
+  return info;
 }
 
 static void update_state(board_dev_fs_t* fs, flow_sensor_state_t new_state) {

@@ -47,6 +47,16 @@ typedef enum flow_sensor_state_t {
   FS_SENSOR_ST_READ_FLOW,
 } flow_sensor_state_t;
 
+typedef struct fs_values_t {
+  hal_timestamp_t ts;
+  float flow;
+} fs_values_t;
+
+typedef struct fs_info_t {
+  uint32_t product;
+  uint32_t serial;
+} fs_info_t;
+
 typedef struct board_dev_fs_t {
   hal_i2c_dev_t i2c_dev;  //!< I2C device to use
   board_dev_status_t status;
@@ -69,37 +79,30 @@ typedef struct board_dev_fs_t {
 void fs_init(board_dev_fs_t* fs, hal_i2c_dev_t i2c_dev, const sfm3000_settings_t* settings);
 
 /**
- * @brief
+ * @brief Update flow sensor state machine and get current value(s)
  *
  * @param fs
+ * @param values
  * @return board_dev_status_t
  */
-board_dev_status_t fs_update(board_dev_fs_t* fs);
+board_dev_status_t fs_update(board_dev_fs_t* fs, fs_values_t* values);
 
 /**
- * @brief
+ * @brief Set flow sensor settings
  *
  * @param fs
  * @param settings
  */
-void fs_set_settings(board_dev_fs_t* fs, const sfm3000_settings_t* settings);
+board_dev_status_t fs_set_settings(board_dev_fs_t* fs, const sfm3000_settings_t* settings);
 
 /**
- * @brief
+ * @brief Get Flow sensor information
  *
  * @param fs
- * @param flow
- * @return board_dev_status_t
+ * @param info
+ * @return fs_info_t*
  */
-board_dev_status_t fs_get_flow(board_dev_fs_t* fs, float* flow);
-
-/**
- * @brief
- *
- * @param fs
- * @return board_dev_status_t
- */
-board_dev_status_t fs_get_status(board_dev_fs_t* fs);
+fs_info_t* fs_get_info(board_dev_fs_t* fs, fs_info_t* info);
 
 /** @} */
 

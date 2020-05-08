@@ -55,6 +55,8 @@ typedef struct board_t {
   board_dev_ps_t ps1;
   board_dev_fs_t fs1;
   hal_timestamp_t ts_state;
+  ps_values_t ps1_value;
+  fs_values_t fs1_value;
 } board_t;
 
 /**

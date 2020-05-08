@@ -37,7 +37,7 @@ void board_init(board_t* board) {
 
   if (board != NULL) {
     sw_init(&board->sw, HAL_I2C_DEV_SWITCH);
-    ps_init(&board->ps1, HAL_I2C_DEV_PS1, &common_ps_qx);
+    ps_init(&board->ps1, HAL_I2C_DEV_PS1, MS5525DSO_OSR256, &common_ps_qx);
     fs_init(&board->fs1, HAL_I2C_DEV_FS1, &fs_settings);
     update_state(board, BOARD_ST_HARD_RESET);
   }
@@ -65,7 +65,7 @@ void board_update(board_t* board) {
       case BOARD_ST_SOFT_RESET:
         // (re)Initialize sensor controllers
         sw_init(&board->sw, HAL_I2C_DEV_SWITCH);
-        ps_init(&board->ps1, HAL_I2C_DEV_PS1, &common_ps_qx);
+        ps_init(&board->ps1, HAL_I2C_DEV_PS1, MS5525DSO_OSR256, &common_ps_qx);
         fs_init(&board->fs1, HAL_I2C_DEV_FS1, &fs_settings);
         update_state(board, BOARD_ST_SOFT_RESET_WAIT);
         break;
@@ -74,7 +74,7 @@ void board_update(board_t* board) {
         // Update the presssure sensor
         res = sw_set_channel(&board->sw, HAL_I2C_SWITCH_CH_PS1);
         if (res == BOARD_DEV_READY) {
-          res = ps_update(&board->ps1);
+          res = ps_update(&board->ps1, &board->ps1_value);
         }
 
         // Update the flow sensor
@@ -83,7 +83,7 @@ void board_update(board_t* board) {
         }
 
         if (res == BOARD_DEV_READY) {
-          res = fs_update(&board->fs1);
+          res = fs_update(&board->fs1, &board->fs1_value);
         }
 
         // Keep trying until both boards are ready, or we timeout and reset
@@ -101,7 +101,7 @@ void board_update(board_t* board) {
         // Update the pressure sensor
         res = sw_set_channel(&board->sw, HAL_I2C_SWITCH_CH_PS1);
         if (res == BOARD_DEV_READY) {
-          res = ps_update(&board->ps1);
+          res = ps_update(&board->ps1, &board->ps1_value);
         }
 
         // Update the flow sensor
@@ -109,7 +109,7 @@ void board_update(board_t* board) {
           res = sw_set_channel(&board->sw, HAL_I2C_SWITCH_CH_FS1);
         }
         if (res == BOARD_DEV_READY) {
-          res = fs_update(&board->fs1);
+          res = fs_update(&board->fs1, &board->fs1_value);
         }
 
         // If either device errors, we are in trouble

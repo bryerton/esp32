@@ -1,3 +1,20 @@
+/*
+Copyright 2020 TRIUMF
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see www.gnu.org/licenses/.
+*/
+
 #include <string.h>
 #include <stdarg.h>
 #include <esp_system.h>
@@ -14,6 +31,7 @@ static const char* get_log_color(hal_log_level_t log_level);
 static const char* get_log_level_string(hal_log_level_t log_level);
 
 hal_timestamp_t hal_get_timestamp(void) { return esp_timer_get_time(); }
+
 void hal_set_log_level(hal_log_level_t new_log_level) {
   current_log_level = new_log_level;
 }

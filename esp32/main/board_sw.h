@@ -37,6 +37,7 @@ extern "C" {
 typedef struct board_dev_sw_t {
   hal_i2c_dev_t i2c_dev;  //!< I2C device to use
   board_dev_status_t status;
+  uint8_t last_channel;
 } board_dev_sw_t;
 
 /**
@@ -63,14 +64,6 @@ board_dev_status_t sw_set_channel(board_dev_sw_t* sw, uint8_t ch);
  * @return board_dev_status_t
  */
 board_dev_status_t sw_get_channel(board_dev_sw_t* sw, uint8_t* ch);
-
-/**
- * @brief
- *
- * @param sw
- * @return board_dev_status_t
- */
-board_dev_status_t sw_get_status(const board_dev_sw_t* sw);
 
 /** @} */
 

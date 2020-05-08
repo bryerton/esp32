@@ -55,26 +55,12 @@ board_dev_status_t sw_get_channel(board_dev_sw_t* sw, uint8_t* ch) {
 
   retval = BOARD_DEV_NOT_READY;
 
-  if ((ch != NULL) && (sw != NULL)) {
+  if ((sw != NULL) && (ch != NULL)) {
     // Get the current channel from the switch
     res = tca9548a_read_channel(hal_i2c_get_config(HAL_I2C_DEV_SWITCH), ch);
     if (res == HAL_OK) {
       sw->status = BOARD_DEV_READY;
     }
-    retval = sw->status;
-  }
-
-  return retval;
-}
-
-board_dev_status_t sw_get_status(const board_dev_sw_t* sw) {
-  board_dev_status_t retval;
-
-  assert(sw);
-
-  retval = BOARD_DEV_NOT_READY;
-
-  if (sw != NULL) {
     retval = sw->status;
   }
 

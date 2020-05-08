@@ -224,6 +224,8 @@ void ms5525dso_calculate_pt(const ms5525dso_qx_t* qx,
                                  uint32_t d2, float* p_compensated,
                                  float* t_compensated);
 
+hal_timestamp_t ms5525dso_get_conversion_time(ms5525dso_osr_t osr);
+
 /** @} */
 
 #ifdef __cplusplus

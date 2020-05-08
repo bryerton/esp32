@@ -269,3 +269,14 @@ void ms5525dso_calculate_pt(const ms5525dso_qx_t* qx,
     *t_compensated = MS5525DSO_CONVERT_T_TO_FLOAT(TEMP);
   }
 }
+
+hal_timestamp_t ms5525dso_get_conversion_time(ms5525dso_osr_t osr) {
+  switch (osr) {
+    case MS5525DSO_OSR256: return  625;
+    case MS5525DSO_OSR512: return 1250;
+    case MS5525DSO_OSR1024: return 2500;
+    case MS5525DSO_OSR2048: return 5000;
+    case MS5525DSO_OSR4096: return 10000;
+    default: return 10000;
+  }
+}
