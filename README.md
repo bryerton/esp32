@@ -60,13 +60,10 @@ In the `esp32` directory, type `idf.py monitor` to build the project
 ## File Layout
     scripts - Useful project related scripts
     docs - documentation and datasheets
-    common - common codebase
-        src - source code for control loop
-        test - unit tests for control loop
-        sim - simulation of control loop
-    board - Board-specific codebase
+    esp32 - Source code
         main - source code for ESP32 and board support
         test - unit tests for board
     thirdparty
         esp-idf - Espressif ESP-IDF v3.3.1
         Unity - Unity test framework v2.5.0
+        cppcheck - Static analysis tool v1.90
